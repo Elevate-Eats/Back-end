@@ -126,52 +126,52 @@ exports.register = (req, res) => {
                     })
                 }
             }
-        })
-        db.query('INSERT INTO companies SET ?', { name: company },async (err, results) => {
-            if (err) {
-                console.log(err);
-            } 
-        })
-        db.query('SELECT id FROM companies WHERE name = ?', [company], async (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ error: true, message: 'Server error' });
-            }
-
-            if (results.length === 0) {
-                // Company not found
-                return res.status(404).json({ error: true, message: 'Company not found' });
-            }
-
-            const companyId = results[0].id;
-            db.query('SELECT email from users WHERE email = ?', [email], async (err, results) => {
+            db.query('INSERT INTO companies SET ?', { name: company }, async (err, results) => {
                 if (err) {
                     console.log(err);
-                } else {
-                    if (results.length > 0) {
-                        return res.status(503).json({
-                            error: true,
-                            message: 'email already used'
-                        })
-                    } else if (password != passwordConfirm) {
-                        return res.status(504).json({
-                            error: true,
-                            message: 'password do not match'
-                        })
-                    }
                 }
-                let hashedPassword = await bcrypt.hash(password, 8);
-                console.log(hashedPassword);
-                const branch_access_test = '{all}';
-                db.query('INSERT INTO users SET ?', { name: name, email: email, branch_access: branch_access_test, password: hashedPassword, nickname: nickname, company_id: companyId, role: role }, (err, results) => {
+
+                db.query('SELECT id FROM companies WHERE name = ?', [company], async (err, results) => {
                     if (err) {
                         console.log(err);
-                    } else {
-                        return res.status(200).json({
-                            error: false,
-                            message: 'account registered'
-                        });
+                        return res.status(500).json({ error: true, message: 'Server error' });
                     }
+
+                    if (results.length === 0) {
+                        // Company not found
+                        return res.status(404).json({ error: true, message: 'Company not found' });
+                    }
+                    const companyId = results[0].id;
+                    db.query('SELECT email from users WHERE email = ?', [email], async (err, results) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            if (results.length > 0) {
+                                return res.status(503).json({
+                                    error: true,
+                                    message: 'email already used'
+                                })
+                            } else if (password != passwordConfirm) {
+                                return res.status(504).json({
+                                    error: true,
+                                    message: 'password do not match'
+                                })
+                            }
+                        }
+                        let hashedPassword = await bcrypt.hash(password, 8);
+                        console.log(hashedPassword);
+                        const branch_access_test = '{all}';
+                        db.query('INSERT INTO users SET ?', { name: name, email: email, branch_access: branch_access_test, password: hashedPassword, nickname: nickname, company_id: companyId, role: role }, (err, results) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                return res.status(200).json({
+                                    error: false,
+                                    message: 'account registered'
+                                });
+                            }
+                        })
+                    })
                 })
             })
         })
