@@ -1,12 +1,13 @@
 const express = require('express');
-const path = require('path');
+// const path = require('path');
 const mysql = require('mysql');
-const dotenv = require('dotenv').config();
+// const dotenv = require('dotenv').config();
 const multer = require('multer');
+
 const upload = multer();
 const app = express();
 
-app.use(express.static("public"));
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(upload.none());
