@@ -8,7 +8,8 @@ CREATE TABLE branches (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
-  location VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  manager VARCHAR(255) NOT NULL,
   UNIQUE KEY unique_branch_name (company_id, name),
   FOREIGN KEY (company_id) REFERENCES companies(id)
 );
