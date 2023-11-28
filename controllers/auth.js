@@ -41,8 +41,24 @@ exports.login = async (req, res) => {
         });
       }
 
-      const { id, nickname, role } = results.rows[0];
-      const token = jwt.sign({ id, email, role }, process.env.JWT_SECRET, {
+      const {
+        id,
+        nickname,
+        role,
+        // eslint-disable-next-line camelcase
+        company_id,
+        // eslint-disable-next-line camelcase
+        branch_access,
+      } = results.rows[0];
+      const token = jwt.sign({
+        id,
+        email,
+        role,
+        // eslint-disable-next-line camelcase
+        company_id,
+        // eslint-disable-next-line camelcase
+        branch_access,
+      }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
@@ -229,7 +245,7 @@ exports.register = async (req, res) => {
     });
   }
 };
-exports.isLoggedIn = async (req, res) => {
+exports.isLoggedIn = async (req, res, next) => {
   try {
     const authorizationHeader = req.headers.authorization;
     if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
@@ -238,24 +254,24 @@ exports.isLoggedIn = async (req, res) => {
       db.query('SELECT * FROM users WHERE id = $1', [decoded.id], (err, results) => {
         if (err) {
           console.log(err);
-          return res.status(500)({
+          return res.status(500).json({
             message: 'Internal Server Error',
             error: true,
           });
         }
         if (decoded.exp < Date.now() / 1000) {
-          return res.status(501)({
+          return res.status(501).json({
             message: 'Token Expired',
             error: true,
           });
         }
-        if (!results || results.length === 0) {
+        if (!results || results.rows.length === 0) {
           return res.status(401).json({
             status: 'failed',
             message: 'Invalid token',
           });
         }
-        // eslint-disable-next-line no-undef
+        [req.user] = results;
         next();
         return console.log('isLoggedIn checking user existence executed');
       });
