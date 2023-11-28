@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const { Pool } = require('pg');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const upload = multer();
 const app = express();
@@ -11,6 +13,31 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(upload.none());
+
+// SwaggerUI Docs
+const swOptions = {
+  definition: {
+    openapi: '3.1.0',
+    info: {
+      title: 'Elevate Eats API Documentation',
+    },
+    servers: [
+      {
+        url: 'http://localhost:8080',
+      },
+    ],
+  },
+  apis: [
+    './routes/*.js',
+  ],
+};
+
+const swSpecs = swaggerJsdoc(swOptions);
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swSpecs),
+);
 
 // Database Connection
 const db = new Pool({

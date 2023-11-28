@@ -81,12 +81,13 @@ exports.showSingleBranch = async (req, res) => {
 
 exports.createBranch = async (req, res) => {
   try {
+    console.log('test case');
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyId } = decoded; // Corrected companyId extraction
+    const { company_id } = decoded; // Corrected companyId extraction
     const { name, address, manager } = req.body;
-    db.query('INSERT INTO branches (name,address,manager,company_id) VALUES ($1,$2,$3)', [name, address, manager, companyId], (err) => {
+    db.query('INSERT INTO branches (name,address,manager,company_id) VALUES ($1,$2,$3,$4)', [name, address, manager, company_id], (err) => {
       if (err) {
         console.log(err);
       } else {
@@ -109,9 +110,9 @@ exports.deleteBranch = async (req, res) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyId } = decoded;
+    const { company_id } = decoded;
     const { branchName } = req.body;
-    db.query('DELETE FROM branches WHERE company_id = $1 AND name = $2 ', [companyId, branchName], (err) => {
+    db.query('DELETE FROM branches WHERE company_id = $1 AND name = $2 ', [company_id, branchName], (err) => {
       if (err) {
         console.log(err);
       } else {
