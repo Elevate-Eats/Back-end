@@ -1,47 +1,46 @@
+require('dotenv').config();
 const express = require('express');
-// const path = require('path');
-const mysql = require('mysql');
-// const dotenv = require('dotenv').config();
 const multer = require('multer');
+const { Pool } = require('pg');
 
 const upload = multer();
 const app = express();
 
+// Middleware
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(upload.none());
 
-// Membuat koneksi ke database MySQL
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+// Database Connection
+const db = new Pool({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 });
 
-// Menghubungkan ke database
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to database:', err);
-  } else {
-    console.log('Connected to the database');
-  }
-});
+// Connect to the database
+db.connect()
+  .then(() => console.log('Connected to PostgreSQL'))
+  .catch((err) => console.error('Error connecting to PostgreSQL:', err));
 
-// Handle koneksi database
+// Middleware to handle database connection
 app.use((req, res, next) => {
   req.db = db;
   next();
 });
 
+// Default route
 app.get('/', (req, res) => {
   res.send('Hello, Node.js!');
 });
 
 // Define Routes
 app.use('/auth/v1', require('./routes/auth'));
-
+app.use('/branch/v1', require('./routes/branch'));
+// Start the server
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);

@@ -1,15 +1,17 @@
-const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { Pool } = require('pg');
+
 // const nodemailer = require('nodemailer');
 // const shortid = require('shortid');
 
-const db = mysql.createPool({
-  connectionLimit: 10,
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+// Database Connection
+const db = new Pool({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 });
 
 exports.login = async (req, res) => {
@@ -17,81 +19,134 @@ exports.login = async (req, res) => {
     console.log(req.body.email);
     console.log(req.body.password);
     const { apikey } = req.headers;
+
     if (apikey !== process.env.API_KEY) {
       return res.status(400).json({ error: 'true', message: 'API_KEY Invalid' });
     }
+
     const { email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^.{8,}$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'true', message: 'invalid email format' });
+
+    if (!emailRegex.test(email) || !passwordRegex.test(password)) {
+      return res.status(400).json({ error: 'true', message: 'Invalid email or password format' });
     }
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({ error: 'true', message: 'invalid password format' });
-    }
-    if (!email || !password) {
-      return res.status(400).json({ status: 'invalid input' });
-    }
-    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+
+    db.query('SELECT * FROM users WHERE email = $1', [email], async (err, results) => {
       console.log(results);
-      if (!results || !await bcrypt.compare(password, results[0].password)) {
-        res.status(401).json({
+      if (!results || !await bcrypt.compare(password, results.rows[0].password)) {
+        return res.status(401).json({
           error: true,
           message: 'Email or Password is incorrect',
         });
-      } else {
-        const { id } = results[0];
-        const { email } = results[0];
-        const { nickname } = results[0];
-        const { role } = results[0];
-        const token = jwt.sign({ id, email, role }, process.env.JWT_SECRET, {
-          expiresIn: process.env.JWT_EXPIRES_IN,
-        });
-
-        console.log(`the token is ${token}`);
-
-        const cookieOptions = {
-          expires: new Date(
-            Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000,
-          ),
-        };
-        res.cookie('usersSave', token, cookieOptions);
-        res.status(200).json({
-          error: false,
-          message: 'successful login',
-          token,
-          nickname,
-        });
       }
+
+      const { id, nickname, role } = results.rows[0];
+      const token = jwt.sign({ id, email, role }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+
+      console.log(`the token is ${token}`);
+
+      const cookieOptions = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000),
+      };
+      res.cookie('usersSave', token, cookieOptions);
+      return res.status(200).json({
+        error: false,
+        message: 'Successful login',
+        token,
+        nickname,
+      });
     });
   } catch (err) {
     console.log(err);
     console.log('Login handler Error');
-    return res.status(501).json(
-      {
-        message: 'server error for login',
-        error: true,
-      },
-    );
+    return res.status(501).json({
+      message: 'Server error for login',
+      error: true,
+    });
   }
+  return console.log('Login Controller Executed');
 };
-exports.register = (req, res) => {
+
+// Helper for register
+async function checkCompanyExistence(companyName) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT name from companies WHERE name = $1', [companyName], (err, results) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        resolve(results.rows.length > 0);
+      }
+    });
+  });
+}
+
+// Helper function to insert a new company and return its ID
+async function insertCompany(companyName) {
+  return new Promise((resolve, reject) => {
+    db.query('INSERT INTO companies (name) VALUES ($1)', [companyName], (err) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        db.query('SELECT id FROM companies WHERE name = $1', [companyName], (err2, results2) => {
+          if (err2) {
+            console.error(err2);
+            reject(err2);
+          } else {
+            resolve(results2.rows[0].id);
+          }
+        });
+      }
+    });
+  });
+}
+
+// Helper function to check if an email already exists
+async function checkEmailExistence(email) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT email from users WHERE email = $1', [email], (err, results) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        resolve(results.rows.length > 0);
+      }
+    });
+  });
+}
+
+// Helper function to insert a new user
+async function insertUser(user) {
+  const {
+    name, email, branchAccess, password, nickname, companyId, role,
+  } = user;
+  return new Promise((resolve, reject) => {
+    db.query('INSERT INTO users (name, nickname, email, password, role, branch_access, company_id) VALUES ($1, $2, $3, $4, $5, $6, $7)', [name, nickname, email, password, role, branchAccess, companyId], (err, results) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+
+exports.register = async (req, res) => {
   try {
     console.log(req.body);
     const { apikey } = req.headers;
     const {
       company, name, nickname, role, email, password, passwordConfirm,
     } = req.body;
+
     if (apikey !== process.env.API_KEY) {
-      return res.status(400).json({ error: 'true', message: 'API_KEY Invalid' });
+      return res.status(400).json({ error: true, message: 'API_KEY Invalid' });
     }
-    console.log(req.body.company);
-    console.log(req.body.name);
-    console.log(req.body.nickname);
-    console.log(req.body.email);
-    console.log(req.body.password);
-    console.log(req.body.passwordConfirm);
-    console.log(req.body.role);
 
     const passwordConfirmRegex = /^.{8,}$/;
     const nameRegex = /.+/;
@@ -99,6 +154,8 @@ exports.register = (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const roleRegex = /^(general_manager|area_manager|store_manager)$/;
     const passwordRegex = /^.{8,}$/;
+
+    // Validation checks
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: 'true', message: 'invalid email format' });
     }
@@ -117,87 +174,102 @@ exports.register = (req, res) => {
     if (!nicknameRegex.test(nickname)) {
       return res.status(400).json({ error: 'true', message: 'invalid nickname format' });
     }
-    // Pelajarin lagi ini, kalau misal company di awal mah bisa,
-    // tapi ribet kalo udah cuma bisa via gm yang daftar
-
-    db.query('SELECT name from companies WHERE name= ?', [company], async (err, results) => {
-      if (err) {
-        console.log(err);
-      } else if (results.length > 0) {
-        return res.status(503).json({
-          error: true,
-          message: 'company name already used',
-        });
-      }
-
-      db.query('INSERT INTO companies SET ?', { name: company }, async (err, results) => {
-        if (err) {
-          console.log(err);
-        }
-
-        db.query('SELECT id FROM companies WHERE name = ?', [company], async (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.status(500).json({ error: true, message: 'Server error' });
-          }
-
-          if (results.length === 0) {
-            // Company not found
-            return res.status(404).json({ error: true, message: 'Company not found' });
-          }
-          const companyId = results[0].id;
-          db.query('SELECT email from users WHERE email = ?', [email], async (err, results) => {
-            if (err) {
-              console.log(err);
-            } else if (results.length > 0) {
-              return res.status(503).json({
-                error: true,
-                message: 'email already used',
-              });
-            } else if (password !== passwordConfirm) {
-              return res.status(504).json({
-                error: true,
-                message: 'password do not match',
-              });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 8);
-            console.log(hashedPassword);
-            const branch_access_test = '{all}';
-            db.query('INSERT INTO users SET ?', {
-              name,
-              email,
-              branch_access: branch_access_test,
-              password: hashedPassword,
-              nickname,
-              company_id: companyId,
-              role,
-            }, (err, results) => {
-              if (err) {
-                console.log(err);
-              } else {
-                return res.status(200).json({
-                  error: false,
-                  message: 'account registered',
-                });
-              }
-            });
-          });
-        });
-      });
-    });
-    // res.send("Form submitted");
-  } catch (err) {
-    console.log(err);
-    console.log('Register handler Error');
-    return res.status(501).json(
-      {
-        message: 'server error for register',
+    // Check if the company name already exists
+    const companyExists = await checkCompanyExistence(company);
+    if (companyExists) {
+      return res.status(503).json({
         error: true,
-      },
-    );
+        message: 'Company name already used',
+      });
+    }
+
+    // Insert new company
+    const companyId = await insertCompany(company);
+
+    // Check if the email is already used
+    const emailExists = await checkEmailExistence(email);
+    if (emailExists) {
+      return res.status(503).json({
+        error: true,
+        message: 'Email already used',
+      });
+    }
+
+    // Check if passwords match
+    if (password !== passwordConfirm) {
+      return res.status(504).json({
+        error: true,
+        message: 'Passwords do not match',
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 8);
+
+    // Insert new user
+    await insertUser({
+      name,
+      email,
+      branchAccess: '{all}',
+      password: hashedPassword,
+      nickname,
+      companyId,
+      role,
+    });
+
+    return res.status(200).json({
+      error: false,
+      message: 'Account registered',
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(501).json({
+      message: 'Server error for register',
+      error: true,
+    });
   }
 };
+exports.isLoggedIn = async (req, res) => {
+  try {
+    const authorizationHeader = req.headers.authorization;
+    if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+      const token = authorizationHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      db.query('SELECT * FROM users WHERE id = $1', [decoded.id], (err, results) => {
+        if (err) {
+          console.log(err);
+          return res.status(500)({
+            message: 'Internal Server Error',
+            error: true,
+          });
+        }
+        if (decoded.exp < Date.now() / 1000) {
+          return res.status(501)({
+            message: 'Token Expired',
+            error: true,
+          });
+        }
+        if (!results || results.length === 0) {
+          return res.status(401).json({
+            status: 'failed',
+            message: 'Invalid token',
+          });
+        }
+        // eslint-disable-next-line no-undef
+        next();
+        return console.log('isLoggedIn checking user existence executed');
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(501).json({
+      message: 'Authorization error',
+      error: true,
+    });
+  }
+  return console.log('IsLoggedIn middleware Executed');
+};
+
 exports.logout = (req, res) => {
   res.cookie('usersSave', 'logout', {
     expires: new Date(Date.now() + 2 * 1000),
