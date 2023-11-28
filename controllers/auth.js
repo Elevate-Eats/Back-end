@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
     }
 
     db.query('SELECT * FROM users WHERE email = $1', [email], async (err, results) => {
-      if (!results) {
+      if (!results || results.rows.length === 0) {
         return res.status(404).json({
           error: true,
           message: 'Email not found',
