@@ -14,6 +14,7 @@
  *        properties:
  *          name:
  *            type: string
+ *            description: Your Name
  *          nickname:
  *            type: string
  *            description: Your Nickname
@@ -24,6 +25,7 @@
  *            description: Your Email
  *          company:
  *            type: string
+ *            type: Your Company
  *          role:
  *            type: string
  *            enum: [general_manager, area_manager, store_manager]
@@ -118,7 +120,7 @@ const router = express.Router();
  *        requestBody:
  *          required: true
  *          content:
- *            application/json:
+ *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/register'
  *        responses:
@@ -181,7 +183,7 @@ router.post('/register', authController.register);
  *        requestBody:
  *          required: true
  *          content:
- *            application/json:
+ *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/login'
  *        responses:
