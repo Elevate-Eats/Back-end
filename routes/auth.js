@@ -11,6 +11,7 @@
  *          - company
  *          - role
  *          - password
+ *          - passwordConfirm
  *        properties:
  *          name:
  *            type: string
@@ -25,15 +26,18 @@
  *            description: Your Email
  *          company:
  *            type: string
- *            type: Your Company
+ *            description: Your Company
  *          role:
  *            type: string
+ *            description: Your Role in Company
  *            enum: [general_manager, area_manager, store_manager]
  *          password:
  *            type: string
+ *            description: Your Password
  *            format: password
  *          passwordConfirm:
  *            type: string
+ *            description: Confirm Your Password
  *            format: password
  *        example:
  *          name: Muhammad Garma
@@ -116,6 +120,7 @@ const router = express.Router();
  *            required: true
  *            schema:
  *              type: string
+ *              description: Your API Key
  *              format: password
  *        requestBody:
  *          required: true

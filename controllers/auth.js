@@ -68,9 +68,9 @@ exports.login = async (req, res) => {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000),
       };
       res.cookie('usersSave', token, cookieOptions);
-      return res.status(200).json({
+      return res.status(202).json({
         error: false,
-        message: 'Successful login',
+        message: 'Successful Login',
         token,
         nickname,
       });
@@ -78,7 +78,7 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.log(err);
     console.log('Login handler Error');
-    return res.status(501).json({
+    return res.status(500).json({
       message: 'Server error for login',
       error: true,
     });

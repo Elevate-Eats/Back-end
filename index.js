@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(upload.none());
 
 // SwaggerUI Docs
+const fallbackURL = 'http://localhost:8080';
 const swOptions = {
   definition: {
     openapi: '3.1.0',
@@ -23,7 +24,7 @@ const swOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:8080',
+        url: `http://${process.env.URL}:${process.env.PORT}` || fallbackURL,
       },
     ],
   },
