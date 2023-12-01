@@ -49,19 +49,15 @@ exports.login = async (req, res) => {
         id,
         nickname,
         role,
-        // eslint-disable-next-line camelcase
-        company_id,
-        // eslint-disable-next-line camelcase
-        branch_access,
+        companyid,
+        branchAccess,
       } = results.rows[0];
       const token = jwt.sign({
         id,
         email,
         role,
-        // eslint-disable-next-line camelcase
-        company_id,
-        // eslint-disable-next-line camelcase
-        branch_access,
+        companyid,
+        branchAccess,
       }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
@@ -145,7 +141,7 @@ async function insertUser(user) {
     name, email, branchAccess, password, nickname, companyId, role,
   } = user;
   return new Promise((resolve, reject) => {
-    db.query('INSERT INTO users (name, nickname, email, password, role, branch_access, company_id) VALUES ($1, $2, $3, $4, $5, $6, $7)', [name, nickname, email, password, role, branchAccess, companyId], (err, results) => {
+    db.query('INSERT INTO users (name, nickname, email, password, role, branchAccess, companyId) VALUES ($1, $2, $3, $4, $5, $6, $7)', [name, nickname, email, password, role, branchAccess, companyId], (err, results) => {
       if (err) {
         console.error(err);
         reject(err);

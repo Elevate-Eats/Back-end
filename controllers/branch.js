@@ -16,8 +16,8 @@ exports.showAllBranch = async (req, res) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyId } = decoded; // Assuming companyId is directly available in the decoded object
-    db.query('SELECT * FROM branches WHERE company_id = $1', [companyId], (err, results) => {
+    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
+    db.query('SELECT * FROM branches WHERE companyId = $1', [companyid], (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: true, message: 'Failed to fetch branch data' });
@@ -49,10 +49,10 @@ exports.showSingleBranch = async (req, res) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyId } = decoded; // Assuming companyId is directly available in the decoded object
+    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
     const { branchName } = req.body;
 
-    db.query('SELECT * FROM branches WHERE company_id = $1 AND branchName = $2', [companyId, branchName], (err, results) => {
+    db.query('SELECT * FROM branches WHERE companyId = $1 AND name = $2', [companyid, branchName], (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: true, message: 'Failed to fetch branch data' });
@@ -85,9 +85,10 @@ exports.createBranch = async (req, res) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { company_id } = decoded; // Corrected companyId extraction
+    const { companyid } = decoded; // Corrected companyId extraction
+    console.log(companyid);
     const { name, address, manager } = req.body;
-    db.query('INSERT INTO branches (name,address,manager,company_id) VALUES ($1,$2,$3,$4)', [name, address, manager, company_id], (err) => {
+    db.query('INSERT INTO branches (name,address,manager,companyId) VALUES ($1,$2,$3,$4)', [name, address, manager, companyid], (err) => {
       if (err) {
         console.log(err);
       } else {
@@ -110,9 +111,9 @@ exports.deleteBranch = async (req, res) => {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { company_id } = decoded;
+    const { companyid } = decoded;
     const { branchName } = req.body;
-    db.query('DELETE FROM branches WHERE company_id = $1 AND name = $2 ', [company_id, branchName], (err) => {
+    db.query('DELETE FROM branches WHERE companyId = $1 AND name = $2 ', [companyid, branchName], (err) => {
       if (err) {
         console.log(err);
       } else {
@@ -135,14 +136,14 @@ exports.updateBranch = async (req, res) => {
   const authorizationHeader = req.headers.authorization;
   const token = authorizationHeader.split(' ')[1];
   const decoded = jwt.decode(token, process.env.JWT_SECRET);
-  const { companyId } = decoded;
+  const { companyid } = decoded;
   const {
     branchName,
     newName,
     address,
     manager,
   } = req.body;
-  db.query('UPDATE branches SET name = $3, address = $4, manager = $5 WHERE company_id = $1 AND name = $2', [companyId, branchName, newName, address, manager], (err) => {
+  db.query('UPDATE branches SET name = $3, address = $4, manager = $5 WHERE companyId = $1 AND name = $2', [companyid, branchName, newName, address, manager], (err) => {
     if (err) {
       console.log(err);
     } else {
