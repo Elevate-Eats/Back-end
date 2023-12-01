@@ -197,7 +197,7 @@ exports.register = async (req, res) => {
     // Check if the company name already exists
     const companyExists = await checkCompanyExistence(company);
     if (companyExists) {
-      return res.status(503).json({
+      return res.status(409).json({
         error: true,
         message: 'Company name already used',
       });
@@ -209,7 +209,7 @@ exports.register = async (req, res) => {
     // Check if the email is already used
     const emailExists = await checkEmailExistence(email);
     if (emailExists) {
-      return res.status(503).json({
+      return res.status(409).json({
         error: true,
         message: 'Email already used',
       });
@@ -217,9 +217,9 @@ exports.register = async (req, res) => {
 
     // Check if passwords match
     if (password !== passwordConfirm) {
-      return res.status(504).json({
+      return res.status(412).json({
         error: true,
-        message: 'Passwords do not match',
+        message: 'Passwords does not match',
       });
     }
 
