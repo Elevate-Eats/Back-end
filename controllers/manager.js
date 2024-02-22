@@ -92,13 +92,11 @@ exports.deleteManager = async (req, res) => {
     db.query('DELETE FROM users WHERE id = $1 ', [managerId], (err) => {
       if (err) {
         console.log(err);
-      } else {
-        return res.status(200).json({
-          error: false,
-          message: 'Manager deleted',
-        });
       }
-      return console.log('deleteManager controller executed');// GAGUNA ini, RETURN RES kasih sini aja tar
+      return res.status(200).json({
+        error: false,
+        message: 'Manager deleted',
+      });    
     });
   } catch (err) {
     console.log('deleteManager Error:');

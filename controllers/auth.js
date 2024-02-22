@@ -157,7 +157,7 @@ exports.register = async (req, res) => {
     console.log(req.body);
     const { apikey } = req.headers;
     const {
-      company, name, nickname, role, email, password, passwordConfirm,
+      company, name, nickname, phone, role, email, password, passwordConfirm,
     } = req.body;
 
     if (apikey !== process.env.API_KEY) {
@@ -169,6 +169,7 @@ exports.register = async (req, res) => {
     const nicknameRegex = /^.{1,}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const roleRegex = /^(general_manager|area_manager|store_manager)$/;
+    const phoneRegex = /^\+62\d{9,12}$/;
     const passwordRegex = /^.{8,}$/;
 
     // Validation checks
