@@ -12,6 +12,7 @@
  *          - role
  *          - password
  *          - passwordConfirm
+ *          - phone
  *        properties:
  *          name:
  *            type: string
@@ -39,6 +40,10 @@
  *            type: string
  *            description: Confirm Your Password
  *            format: password
+ *          phone:
+ *            type: string
+ *            description: Your Phone Number
+ *            example: "\uFF0B6281122445566"
  *        example:
  *          name: Muhammad Garma
  *          nickname: Garma123
@@ -47,6 +52,7 @@
  *          role: general_manager
  *          password: IniPassword
  *          passwordConfirm: IniPassword
+ *          phone: "\uFF0B6281122445566"
  *      login:
  *        type: object
  *        required:

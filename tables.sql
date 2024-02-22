@@ -10,6 +10,7 @@ CREATE TABLE branches (
   name VARCHAR(255) NOT NULL,
   address VARCHAR(255) NOT NULL,
   manager VARCHAR(255) NOT NULL,
+  phone VARCHAR(15) NOT NULL,
   UNIQUE KEY unique_branch_name (company_id, name),
   FOREIGN KEY (company_id) REFERENCES companies(id)
 );
@@ -22,6 +23,7 @@ CREATE TABLE users (
   company_id INT, -- Company ID untuk mengaitkan pengguna dengan perusahaan
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
+  phone VARCHAR(15) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id)
