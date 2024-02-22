@@ -15,7 +15,9 @@ app.use(express.json());
 app.use(upload.none());
 
 // SwaggerUI Docs
+// Please Add $URL and $PORT or $HTTPS_URL to build ENV
 const fallbackURL = 'http://localhost:8080';
+const envURL = `http://${process.env.URL}:${process.env.PORT}` || `${process.env.HTTPS_URL}`;
 const swOptions = {
   definition: {
     openapi: '3.1.0',
@@ -24,7 +26,7 @@ const swOptions = {
     },
     servers: [
       {
-        url: `http://${process.env.URL}:${process.env.PORT}` || fallbackURL,
+        url: envURL || fallbackURL,
       },
     ],
   },
