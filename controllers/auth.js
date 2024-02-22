@@ -16,8 +16,8 @@ const db = new Pool({
 
 exports.login = async (req, res) => {
   try {
-    console.log(req.body.email);
-    console.log(req.body.password);
+    // console.log(req.body.email);
+    // console.log(req.body.password);
     const { apikey } = req.headers;
 
     if (apikey !== process.env.API_KEY) {
