@@ -48,18 +48,18 @@ jobs:
       run: |
         gcloud run deploy ${{ secrets.GCP_RUN_SERVICE }} \
           --image=asia-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ARTIFACT_REPO }}/api:main \
-          --set-env-vars "PG_HOST=${{ secrets.PG_HOST }}"
-          --set-env-vars "PG_USER=${{ secrets.PG_USER }}"
-          --set-env-vars "PG_PASSWORD=${{ secrets.PG_PASSWORD }}"
-          --set-env-vars "PG_DATABASE=${{ secrets.PG_DATABASE }}"
-          --set-env-vars "PG_PORT=${{ secrets.PG_PORT }}"
-          --set-env-vars "DOCS_HTTPS_URL=${{ secrets.DOCS_HTTPS_URL }}"
-          --set-env-vars "API_PORT=8080"
-          --set-env-vars "API_KEY=${{ secrets.API_KEY }}"
-          --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}"
-          --set-env-vars "JWT_resetSECRET=${{ secrets.JWT_RESETSECRET }}"
-          --set-env-vars "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}"
-          --set-env-vars "JWT_COOKIE_EXPIRES=${{ secrets.JWT_COOKIE_EXPIRES }}"
+          --set-env-vars "PG_HOST=${{ secrets.PG_HOST }}" \
+          --set-env-vars "PG_USER=${{ secrets.PG_USER }}" \
+          --set-env-vars "PG_PASSWORD=${{ secrets.PG_PASSWORD }}" \
+          --set-env-vars "PG_DATABASE=${{ secrets.PG_DATABASE }}" \
+          --set-env-vars "PG_PORT=${{ secrets.PG_PORT }}" \
+          --set-env-vars "DOCS_HTTPS_URL=${{ secrets.DOCS_HTTPS_URL }}" \
+          --set-env-vars "API_PORT=8080" \
+          --set-env-vars "API_KEY=${{ secrets.API_KEY }}" \
+          --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+          --set-env-vars "JWT_resetSECRET=${{ secrets.JWT_RESETSECRET }}" \
+          --set-env-vars "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" \
+          --set-env-vars "JWT_COOKIE_EXPIRES=${{ secrets.JWT_COOKIE_EXPIRES }}" \
           --port=8080 \
           --region=asia-east1 \
           --platform=managed \
