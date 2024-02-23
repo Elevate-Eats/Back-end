@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const Joi = require('joi');
 const { Pool } = require('pg');
 
 // const nodemailer = require('nodemailer');
@@ -27,8 +28,12 @@ exports.showAllBranch = async (req, res) => {
         return res.status(404).json({ error: true, message: 'Branch not found' });
       }
       const branchData = results.rows.map((branch) => {
-        const { name, address, manager } = branch;
-        return { name, address, manager };
+        const {
+          id, name, address, manager,
+        } = branch;
+        return {
+          id, name, address, manager,
+        };
       });
       return res.status(200).json({
         error: false,
@@ -46,13 +51,8 @@ exports.showAllBranch = async (req, res) => {
 
 exports.showSingleBranch = async (req, res) => {
   try {
-    const authorizationHeader = req.headers.authorization;
-    const token = authorizationHeader.split(' ')[1];
-    const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-    const { branchName } = req.body;
-
-    db.query('SELECT * FROM branches WHERE companyId = $1 AND name = $2', [companyid, branchName], (err, results) => {
+    const { id } = req.body;
+    db.query('SELECT * FROM branches WHERE id = $1', [id], (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: true, message: 'Failed to fetch branch data' });
@@ -62,8 +62,12 @@ exports.showSingleBranch = async (req, res) => {
         return res.status(404).json({ error: true, message: 'Branch not found' });
       }
 
-      const { name, address, manager } = results.rows[0];
-      const branchData = { name, address, manager };
+      const {
+        name, address, manager,
+      } = results.rows[0];
+      const branchData = {
+        id, name, address, manager,
+      };
 
       return res.status(200).json({
         error: false,
@@ -81,18 +85,35 @@ exports.showSingleBranch = async (req, res) => {
 
 exports.createBranch = async (req, res) => {
   try {
-    console.log('test case');
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Corrected companyId extraction
-    console.log(companyid);
+    const schema = Joi.object({
+      name: Joi.string().min(1).required(),
+      phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
+      address: Joi.string().required(),
+      managerId: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
     const {
       name, phone, address, managerId,
-    } = req.body;
+    } = value;
     db.query('INSERT INTO branches (name, phone, address, managerId,companyId) VALUES ($1,$2,$3,$4,$5)', [name, phone, address, managerId, companyid], (err) => {
       if (err) {
         console.log(err);
+        return res.status(500).json({
+          error: true,
+          message: 'failed to add branch',
+        });
       }
       return res.status(200).json({
         error: false,
@@ -106,16 +127,17 @@ exports.createBranch = async (req, res) => {
   }
   return console.log('createBranch controller executed');
 };
+
 exports.deleteBranch = async (req, res) => {
   try {
-    const authorizationHeader = req.headers.authorization;
-    const token = authorizationHeader.split(' ')[1];
-    const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded;
-    const { branchName } = req.body;
-    db.query('DELETE FROM branches WHERE companyId = $1 AND name = $2 ', [companyid, branchName], (err) => {
+    const { branchId } = req.body;
+    db.query('DELETE FROM branches WHERE id = $1 ', [branchId], (err) => {
       if (err) {
         console.log(err);
+        return res.status(500).json({
+          error: true,
+          message: 'failed to delete branch',
+        });
       }
       return res.status(200).json({
         error: false,
@@ -131,24 +153,37 @@ exports.deleteBranch = async (req, res) => {
 };
 
 exports.updateBranch = async (req, res) => {
-  const authorizationHeader = req.headers.authorization;
-  const token = authorizationHeader.split(' ')[1];
-  const decoded = jwt.decode(token, process.env.JWT_SECRET);
-  const { companyid } = decoded;
+  console.log('Test Case');
+  const schema = Joi.object({
+    id: Joi.number().required(),
+    name: Joi.string().min(1).required(),
+    phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
+    address: Joi.string().required(),
+    managerId: Joi.number().required(),
+  });
+  const { error, value } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      error: true,
+      message: 'Validation error',
+      details: error.details.map((x) => x.message),
+    });
+  }
   const {
-    branchName,
-    name,
-    phone,
-    address,
-    manager,
-  } = req.body;
-  db.query('UPDATE branches SET name = $3, address = $4, manager = $5 WHERE companyId = $1 AND name = $2', [companyid, branchName, name, phone, address, manager], (err) => {
+    id, name, phone, address, managerId,
+  } = value;
+  db.query('UPDATE branches SET name = $2, phone = $3, address = $4, managerId = $5 WHERE id=$1', [id, name, phone, address, managerId], (err) => {
     if (err) {
       console.log(err);
+      return res.status(500).json({
+        error: true,
+        message: 'failed to delete branch',
+      });
     }
     return res.status(200).json({
       error: false,
       message: 'Branch updated',
     });
   });
+  return console.log('deleteBranch controller executed');
 };
