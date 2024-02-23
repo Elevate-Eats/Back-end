@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
+
 const { Pool } = require('pg');
 
 // const nodemailer = require('nodemailer');
@@ -153,7 +154,6 @@ exports.deleteBranch = async (req, res) => {
 };
 
 exports.updateBranch = async (req, res) => {
-  console.log('Test Case');
   const schema = Joi.object({
     id: Joi.number().required(),
     name: Joi.string().min(1).required(),
