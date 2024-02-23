@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 
@@ -16,22 +17,25 @@ const db = new Pool({
 
 exports.login = async (req, res) => {
   try {
-    // console.log(req.body.email);
-    // console.log(req.body.password);
     const { apikey } = req.headers;
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(8).required(),
+    });
 
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { email, password } = value;
     if (apikey !== process.env.API_KEY) {
       return res.status(400).json({ error: 'true', message: 'API_KEY Invalid' });
     }
-
-    const { email, password } = req.body;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^.{8,}$/;
-
-    if (!emailRegex.test(email) || !passwordRegex.test(password)) {
-      return res.status(400).json({ error: 'true', message: 'Invalid email or password format' });
-    }
-
     db.query('SELECT * FROM users WHERE email = $1', [email], async (err, results) => {
       if (!results || results.rows.length === 0) {
         return res.status(404).json({
@@ -156,44 +160,35 @@ exports.register = async (req, res) => {
   try {
     console.log(req.body);
     const { apikey } = req.headers;
+
+    const schema = Joi.object({
+      company: Joi.string().required(),
+      name: Joi.string().required(),
+      nickname: Joi.string().min(1).required(),
+      phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
+      role: Joi.string().valid('general_manager', 'area_manager', 'store_manager').required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().min(8).required(),
+      passwordConfirm: Joi.ref('password'),
+    });
+
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
     const {
       company, name, nickname, phone, role, email, password, passwordConfirm,
-    } = req.body;
+    } = value;
 
     if (apikey !== process.env.API_KEY) {
       return res.status(400).json({ error: true, message: 'API_KEY Invalid' });
     }
 
-    const passwordConfirmRegex = /^.{8,}$/;
-    const nameRegex = /.+/;
-    const nicknameRegex = /^.{1,}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const roleRegex = /^(general_manager|area_manager|store_manager)$/;
-    const phoneRegex = /^\+62\d{9,12}$/;
-    const passwordRegex = /^.{8,}$/;
-
-    // Validation checks
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'true', message: 'invalid email format' });
-    }
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({ error: 'true', message: 'invalid password format' });
-    }
-    if (!nameRegex.test(name)) {
-      return res.status(400).json({ error: 'true', message: 'invalid name format' });
-    }
-    if (!roleRegex.test(role)) {
-      return res.status(400).json({ error: 'true', message: 'invalid role format' });
-    }
-    if (!phoneRegex.test(phone)) {
-      return res.status(400).json({ error: 'true', message: 'invalid phone format' });
-    }
-    if (!passwordConfirmRegex.test(passwordConfirm)) {
-      return res.status(400).json({ error: 'true', message: 'invalid passwordConfirm format' });
-    }
-    if (!nicknameRegex.test(nickname)) {
-      return res.status(400).json({ error: 'true', message: 'invalid nickname format' });
-    }
     // Check if the company name already exists
     const companyExists = await checkCompanyExistence(company);
     if (companyExists) {
@@ -235,6 +230,7 @@ exports.register = async (req, res) => {
       nickname,
       companyId,
       role,
+      phone,
     });
 
     return res.status(200).json({
