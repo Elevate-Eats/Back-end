@@ -96,7 +96,7 @@ exports.deleteManager = async (req, res) => {
       return res.status(200).json({
         error: false,
         message: 'Manager deleted',
-      });    
+      });
     });
   } catch (err) {
     console.log('deleteManager Error:');

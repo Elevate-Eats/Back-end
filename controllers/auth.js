@@ -138,10 +138,10 @@ async function checkEmailExistence(email) {
 // Helper function to insert a new user
 async function insertUser(user) {
   const {
-    name, email, branchAccess, password, nickname, companyId, role,
+    name, email, branchAccess, password, nickname, companyId, role, phone,
   } = user;
   return new Promise((resolve, reject) => {
-    db.query('INSERT INTO users (name, nickname, email, password, role, branchAccess, companyId) VALUES ($1, $2, $3, $4, $5, $6, $7)', [name, nickname, email, password, role, branchAccess, companyId], (err, results) => {
+    db.query('INSERT INTO users (name, nickname, email, password, role, phone, branchAccess, companyId) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [name, nickname, email, password, role, phone, branchAccess, companyId], (err, results) => {
       if (err) {
         console.error(err);
         reject(err);
@@ -184,6 +184,9 @@ exports.register = async (req, res) => {
     }
     if (!roleRegex.test(role)) {
       return res.status(400).json({ error: 'true', message: 'invalid role format' });
+    }
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ error: 'true', message: 'invalid phone format' });
     }
     if (!passwordConfirmRegex.test(passwordConfirm)) {
       return res.status(400).json({ error: 'true', message: 'invalid passwordConfirm format' });
