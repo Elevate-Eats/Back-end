@@ -87,17 +87,17 @@ exports.createBranch = async (req, res) => {
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Corrected companyId extraction
     console.log(companyid);
-    const { name, address, manager } = req.body;
-    db.query('INSERT INTO branches (name,address,manager,companyId) VALUES ($1,$2,$3,$4)', [name, address, manager, companyid], (err) => {
+    const {
+      name, phone, address, managerId,
+    } = req.body;
+    db.query('INSERT INTO branches (name, phone, address, managerId,companyId) VALUES ($1,$2,$3,$4,$5)', [name, phone, address, managerId, companyid], (err) => {
       if (err) {
         console.log(err);
-      } else {
-        return res.status(200).json({
-          error: false,
-          message: 'Branch added',
-        });
       }
-      return console.log('New Branch added to branches table');
+      return res.status(200).json({
+        error: false,
+        message: 'Branch added',
+      });
     });
   } catch (err) {
     console.log('addBranch Error:');
@@ -116,13 +116,11 @@ exports.deleteBranch = async (req, res) => {
     db.query('DELETE FROM branches WHERE companyId = $1 AND name = $2 ', [companyid, branchName], (err) => {
       if (err) {
         console.log(err);
-      } else {
-        return res.status(200).json({
-          error: false,
-          message: 'Branch deleted',
-        });
       }
-      return console.log('deleteBranch controller executed');
+      return res.status(200).json({
+        error: false,
+        message: 'Branch deleted',
+      });
     });
   } catch (err) {
     console.log('addBranch Error:');
@@ -139,19 +137,18 @@ exports.updateBranch = async (req, res) => {
   const { companyid } = decoded;
   const {
     branchName,
-    newName,
+    name,
+    phone,
     address,
     manager,
   } = req.body;
-  db.query('UPDATE branches SET name = $3, address = $4, manager = $5 WHERE companyId = $1 AND name = $2', [companyid, branchName, newName, address, manager], (err) => {
+  db.query('UPDATE branches SET name = $3, address = $4, manager = $5 WHERE companyId = $1 AND name = $2', [companyid, branchName, name, phone, address, manager], (err) => {
     if (err) {
       console.log(err);
-    } else {
-      return res.status(200).json({
-        error: false,
-        message: 'Branch updated',
-      });
     }
-    return console.log('deleteBranch controller executed');
+    return res.status(200).json({
+      error: false,
+      message: 'Branch updated',
+    });
   });
 };
