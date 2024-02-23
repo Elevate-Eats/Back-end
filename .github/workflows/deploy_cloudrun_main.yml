@@ -46,7 +46,7 @@ jobs:
 
     - name: Deploy to Google Cloud Run
       run: |
-        gcloud run deploy your-service-name \
+        gcloud run deploy ${{ secrets.GCP_RUN_SERVICE }} \
           --image=asia-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ARTIFACT_REPO }}/api:main \
           --set-env-vars "PG_HOST=${{ secrets.PG_HOST }}"
           --set-env-vars "PG_USER=${{ secrets.PG_USER }}"
