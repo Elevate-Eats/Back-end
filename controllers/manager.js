@@ -54,7 +54,6 @@ exports.showSingleManager = async (req, res) => {
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
     const { managerId } = req.body;
-
     db.query('SELECT * FROM users WHERE companyId = $1 AND id = $2', [companyid, managerId], (err, results) => {
       if (err) {
         console.log(err);
