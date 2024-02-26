@@ -19,6 +19,7 @@ exports.showAllBranch = async (req, res) => {
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
+    const { search, limit } = req.query;
     db.query('SELECT * FROM branches WHERE companyId = $1', [companyid], (err, results) => {
       if (err) {
         console.log(err);
@@ -28,7 +29,7 @@ exports.showAllBranch = async (req, res) => {
       if (results.rows.length === 0) {
         return res.status(404).json({ error: true, message: 'Branch not found' });
       }
-      const branchData = results.rows.map((branch) => {
+      let branchData = results.rows.map((branch) => {
         const {
           id, name, address, manager,
         } = branch;
@@ -36,6 +37,14 @@ exports.showAllBranch = async (req, res) => {
           id, name, address, manager,
         };
       });
+      if (search) {
+        branchData = branchData.filter((branch) => branch.name.toLowerCase().startsWith(
+          search.toLowerCase(),
+        ));
+      }
+      if (limit) {
+        branchData = branchData.slice(0, Number(limit));
+      }
       return res.status(200).json({
         error: false,
         message: 'Branch data retrieved successfully',
@@ -131,24 +140,39 @@ exports.createBranch = async (req, res) => {
 
 exports.deleteBranch = async (req, res) => {
   try {
-    const { branchId } = req.body;
-    db.query('DELETE FROM branches WHERE id = $1 ', [branchId], (err) => {
+    const { id } = req.body;
+    db.query('SELECT * FROM employees WHERE branchid = $1', [id], (err, results) => {
       if (err) {
-        console.log(err);
         return res.status(500).json({
           error: true,
-          message: 'failed to delete branch',
+          message: 'Check Employees Error',
         });
       }
-      return res.status(200).json({
-        error: false,
-        message: 'Branch deleted',
+      if (results.rows.length > 0) {
+        return res.status(400).json({
+          error: true,
+          message: 'Branch has Employees, please remove the employees',
+        });
+      }
+      db.query('DELETE FROM branches WHERE id = $1 ', [id], (error) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).json({
+            error: true,
+            message: 'failed to delete branch',
+          });
+        }
+        return res.status(200).json({
+          error: false,
+          message: 'Branch deleted',
+        });
       });
+      return console.log('deleteBranch controller executed');
     });
   } catch (err) {
-    console.log('addBranch Error:');
+    console.log('deleteEmployee Error:');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed addBranch' });
+    return res.status(500).json({ error: true, message: 'Failed deleteBranch' });
   }
   return console.log('deleteBranch controller executed');
 };
@@ -177,7 +201,7 @@ exports.updateBranch = async (req, res) => {
       console.log(err);
       return res.status(500).json({
         error: true,
-        message: 'failed to delete branch',
+        message: 'failed to update branch',
       });
     }
     return res.status(200).json({
@@ -185,5 +209,5 @@ exports.updateBranch = async (req, res) => {
       message: 'Branch updated',
     });
   });
-  return console.log('deleteBranch controller executed');
+  return console.log('updateBranch controller executed');
 };

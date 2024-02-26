@@ -15,9 +15,15 @@ app.use(express.json());
 app.use(upload.none());
 
 // SwaggerUI Docs
-// Please Add $URL and $PORT or $HTTPS_URL to build ENV
+// Please Add $DOCS_URL and $DOCS_PORT for HTTP or $DOCS_HTTPS_URL for HTTPS to build ENV
 const fallbackURL = 'http://localhost:8080';
-const envURL = `http://${process.env.DOCS_URL}:${process.env.DOCS_PORT}` || `${process.env.DOCS_HTTPS_URL}`;
+let envURL = null;
+if (process.env.DOCS_URL && process.env.DOCS_PORT) {
+  envURL = `http://${process.env.DOCS_URL}:${process.env.DOCS_PORT}`;
+} else if (process.env.DOCS_HTTPS_URL) {
+  envURL = `${process.env.DOCS_HTTPS_URL}`;
+}
+// const envURL = process.env.DOCS_URL && process.env.DOCS_PORT ? `http://${process.env.DOCS_URL}:${process.env.DOCS_PORT}` : `${process.env.DOCS_HTTPS_URL}`;
 const swOptions = {
   definition: {
     openapi: '3.1.0',
@@ -70,6 +76,7 @@ app.get('/', (req, res) => {
 // Define Routes
 app.use('/auth/v1', require('./routes/auth'));
 app.use('/branch/v1', require('./routes/branch'));
+app.use('/employee/v1/', require('./routes/employee'));
 // Start the server
 const port = process.env.API_PORT || 8080;
 app.listen(port, () => {
