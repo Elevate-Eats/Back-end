@@ -37,12 +37,12 @@ exports.showAllBranch = async (req, res) => {
         };
       });
       if (search) {
-        branchData = branchData.filter((branch) => {
-          return branch.name.toLowerCase().startsWith(search.toLowerCase())
-        })
+        branchData = branchData.filter((branch) => branch.name.toLowerCase().startsWith(
+          search.toLowerCase(),
+        ));
       }
       if (limit) {
-        branchData = branchData.slice(0, Number(limit))
+        branchData = branchData.slice(0, Number(limit));
       }
       return res.status(200).json({
         error: false,
