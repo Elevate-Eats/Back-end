@@ -186,7 +186,7 @@ exports.updateBranch = async (req, res) => {
       console.log(err);
       return res.status(500).json({
         error: true,
-        message: 'failed to delete branch',
+        message: 'failed to update branch',
       });
     }
     return res.status(200).json({
