@@ -18,6 +18,7 @@ exports.showAllBranch = async (req, res) => {
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
+    const { search, limit } = req.query;
     db.query('SELECT * FROM branches WHERE companyId = $1', [companyid], (err, results) => {
       if (err) {
         console.log(err);
@@ -27,7 +28,7 @@ exports.showAllBranch = async (req, res) => {
       if (results.rows.length === 0) {
         return res.status(404).json({ error: true, message: 'Branch not found' });
       }
-      const branchData = results.rows.map((branch) => {
+      let branchData = results.rows.map((branch) => {
         const {
           id, name, address, manager,
         } = branch;
@@ -35,6 +36,14 @@ exports.showAllBranch = async (req, res) => {
           id, name, address, manager,
         };
       });
+      if (search) {
+        branchData = branchData.filter((branch) => {
+          return branch.name.toLowerCase().startsWith(search.toLowerCase())
+        })
+      }
+      if (limit) {
+        branchData = branchData.slice(0, Number(limit))
+      }
       return res.status(200).json({
         error: false,
         message: 'Branch data retrieved successfully',

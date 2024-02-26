@@ -222,6 +222,6 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 // router.post('/forgetpassword', authController.forgetpassword);
 // router.post('/checkreset', authController.checkReset);
-// router.get('/logout', authController.logout);
+router.get('/logout', authController.logout);
 
 module.exports = router;
