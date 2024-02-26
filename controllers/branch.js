@@ -140,22 +140,22 @@ exports.createBranch = async (req, res) => {
 exports.deleteBranch = async (req, res) => {
   try {
     const { id } = req.body;
-    db.query('SELECT * FROM employees WHERE branchid = $1', [id], (err,results)=>{
-      if (err){
+    db.query('SELECT * FROM employees WHERE branchid = $1', [id], (err, results) => {
+      if (err) {
         return res.status(500).json({
-          error:true,
-          message:"Check Employees Error"
-        })
+          error: true,
+          message: 'Check Employees Error',
+        });
       }
-      if(results.rows.length >0){
+      if (results.rows.length > 0) {
         return res.status(400).json({
-          error:true,
-          message:'Branch has Employees, please remove the employees',
-        })
+          error: true,
+          message: 'Branch has Employees, please remove the employees',
+        });
       }
-      db.query('DELETE FROM branches WHERE id = $1 ', [id], (err) => {
-        if (err) {
-          console.log(err);
+      db.query('DELETE FROM branches WHERE id = $1 ', [id], (error) => {
+        if (error) {
+          console.log(error);
           return res.status(500).json({
             error: true,
             message: 'failed to delete branch',
@@ -166,8 +166,8 @@ exports.deleteBranch = async (req, res) => {
           message: 'Branch deleted',
         });
       });
+      return console.log('deleteBranch controller executed');
     });
-
   } catch (err) {
     console.log('deleteEmployee Error:');
     console.log(err);
