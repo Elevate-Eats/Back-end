@@ -102,7 +102,6 @@ exports.createBranch = async (req, res) => {
       name: Joi.string().min(1).required(),
       phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
       address: Joi.string().required(),
-      managerId: Joi.number()
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
 
