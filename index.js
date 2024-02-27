@@ -77,6 +77,7 @@ app.get('/', (req, res) => {
 app.use('/auth/v1', require('./routes/auth'));
 app.use('/branch/v1', require('./routes/branch'));
 app.use('/employee/v1/', require('./routes/employee'));
+app.use('/manager/v1/', require('./routes/manager'));
 // Start the server
 const port = process.env.API_PORT || 8080;
 app.listen(port, () => {

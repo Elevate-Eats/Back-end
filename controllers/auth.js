@@ -211,14 +211,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Check if passwords match
-    if (password !== passwordConfirm) {
-      return res.status(412).json({
-        error: true,
-        message: 'Passwords does not match',
-      });
-    }
-
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 8);
 
