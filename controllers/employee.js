@@ -104,6 +104,7 @@ exports.createEmployee = async (req, res) => {
   }
   return console.log('createEmployee controller executed');
 };
+
 exports.showSingleEmployee = (req, res) => {
   try {
     const { id } = req.body;
