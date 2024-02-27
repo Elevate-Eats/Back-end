@@ -26,6 +26,10 @@
  *        type: object
  *        required:
  *          - id
+ *          - name
+ *          - salary
+ *          - bonus
+ *          - branchId
  *        properties:
  *          id:
  *            type: integer
