@@ -93,10 +93,10 @@ const router = express.Router();
  *              type: integer
  *            description: Show limited Number of Employees
  *          - in: query
- *            name: Employee
+ *            name: unassigned
  *            schema:
  *              type: integer
- *            description: Find Employee Data base of EmployeeID
+ *            description: Find Employee that is Unassigned to Branch
  *        responses:
  *          200:
  *            description: Employee Found
