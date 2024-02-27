@@ -18,7 +18,7 @@ exports.showAllEmployee = async (req, res) => {
         const token = authorizationHeader.split(' ')[1];
         const decoded = jwt.decode(token, process.env.JWT_SECRET);
         const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-        const { search, limit, Employee } = req.query;
+        const { search, limit, unassigned } = req.query;
         db.query('SELECT * FROM employees WHERE companyId = $1', [companyid], (err, results) => {
             if (err) {
                 console.log(err);
@@ -30,10 +30,10 @@ exports.showAllEmployee = async (req, res) => {
             }
             let employeeData = results.rows.map((employee) => {
                 const {
-                    id, name, salary, bonus, EmployeeId
+                    id, name, salary, bonus, branchid
                 } = employee;
                 return {
-                    id, name, salary, bonus, EmployeeId
+                    id, name, salary, bonus, branchid
                 };
             });
             if (search) {
@@ -41,11 +41,11 @@ exports.showAllEmployee = async (req, res) => {
                     search.toLowerCase(),
                 ));
             }
+            if (unassigned){
+              employeeData = employeeData.filter((employee)=> employee.branchid === null);
+            }
             if (limit) {
                 employeeData = employeeData.slice(0, Number(limit));
-            }
-            if (Employee) {
-                employeeData = employeeData.filter((employee) => employee.EmployeeId === Employee)
             }
             return res.status(200).json({
                 error: false,
