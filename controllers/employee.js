@@ -118,10 +118,10 @@ exports.showSingleEmployee= (req,res)=>{
           }
     
           const {
-            name, address, manager,
+            id, name, salary, bonus, EmployeeId
           } = results.rows[0];
           const employeeData = {
-            id, name, address, manager,
+            id, name, salary, bonus, EmployeeId
           };
     
           return res.status(200).json({
