@@ -163,15 +163,6 @@
 
 /**
  *  @swagger
- *  components:
- *    securitySchemes:
- *      bearerAuth:
- *        type: http
- *        scheme: bearer
- */
-
-/**
- *  @swagger
  *  tags:
  *    - name: Branch
  *      description: Branch Operations
