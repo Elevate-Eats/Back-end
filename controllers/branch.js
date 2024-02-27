@@ -113,7 +113,7 @@ exports.createBranch = async (req, res) => {
       });
     }
     const {
-      name, phone, address, managerId,
+      name, phone, address,
     } = value;
     db.query('INSERT INTO branches (name, phone, address, managerId,companyId) VALUES ($1,$2,$3,$4,$5)', [name, phone, address, managerId, companyid], (err) => {
       if (err) {
