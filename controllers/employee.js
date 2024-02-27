@@ -13,59 +13,14 @@ const db = new Pool({
 });
 
 exports.showAllEmployee = async (req, res) => {
-<<<<<<< HEAD
   try {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-    const { search, limit, Employee } = req.query;
+    const { search, limit, unassigned } = req.query;
     db.query('SELECT * FROM employees WHERE companyId = $1', [companyid], (err, results) => {
       if (err) {
-=======
-    try {
-        const authorizationHeader = req.headers.authorization;
-        const token = authorizationHeader.split(' ')[1];
-        const decoded = jwt.decode(token, process.env.JWT_SECRET);
-        const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-        const { search, limit, unassigned } = req.query;
-        db.query('SELECT * FROM employees WHERE companyId = $1', [companyid], (err, results) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ error: true, message: 'Failed to fetch employee data' });
-            }
-
-            if (results.rows.length === 0) {
-                return res.status(404).json({ error: true, message: 'employee not found' });
-            }
-            let employeeData = results.rows.map((employee) => {
-                const {
-                    id, name, salary, bonus, branchid
-                } = employee;
-                return {
-                    id, name, salary, bonus, branchid
-                };
-            });
-            if (search) {
-                employeeData = employeeData.filter((employee) => employee.name.toLowerCase().startsWith(
-                    search.toLowerCase(),
-                ));
-            }
-            if (unassigned){
-              employeeData = employeeData.filter((employee)=> employee.branchid === null);
-            }
-            if (limit) {
-                employeeData = employeeData.slice(0, Number(limit));
-            }
-            return res.status(200).json({
-                error: false,
-                message: 'employee data retrieved successfully',
-                employeeData,
-            });
-        });
-    } catch (err) {
-        console.log('showEmployee Error:');
->>>>>>> 24b9512c8107fdb2ec2cd54a29529fefc31f8cd3
         console.log(err);
         return res.status(500).json({ error: true, message: 'Failed to fetch employee data' });
       }
@@ -75,10 +30,10 @@ exports.showAllEmployee = async (req, res) => {
       }
       let employeeData = results.rows.map((employee) => {
         const {
-          id, name, salary, bonus, EmployeeId,
+          id, name, salary, bonus, branchid,
         } = employee;
         return {
-          id, name, salary, bonus, EmployeeId,
+          id, name, salary, bonus, branchid,
         };
       });
       if (search) {
@@ -86,11 +41,11 @@ exports.showAllEmployee = async (req, res) => {
           search.toLowerCase(),
         ));
       }
+      if (unassigned) {
+        employeeData = employeeData.filter((employee) => employee.branchid === null);
+      }
       if (limit) {
         employeeData = employeeData.slice(0, Number(limit));
-      }
-      if (Employee) {
-        employeeData = employeeData.filter((employee) => employee.EmployeeId === Employee);
       }
       return res.status(200).json({
         error: false,
@@ -107,91 +62,11 @@ exports.showAllEmployee = async (req, res) => {
 };
 
 exports.createEmployee = async (req, res) => {
-<<<<<<< HEAD
   try {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-=======
-    try {
-        const authorizationHeader = req.headers.authorization;
-        const token = authorizationHeader.split(' ')[1];
-        const decoded = jwt.decode(token, process.env.JWT_SECRET);
-        const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-        const schema = Joi.object({
-            name: Joi.string().min(1).required(),
-            salary: Joi.number().required(),
-            bonus: Joi.number().required(),
-        });
-        const { error, value } = schema.validate(req.body, { abortEarly: false });
-
-        if (error) {
-            return res.status(400).json({
-                error: true,
-                message: 'Validation error',
-                details: error.details.map((x) => x.message),
-            });
-        }
-        const {
-            name, salary, bonus
-        } = value;
-        db.query('INSERT INTO employees (name, salary, bonus, companyId) VALUES ($1,$2,$3,$4)', [name, salary, bonus, companyid], (err) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({
-                    error: true,
-                    message: 'failed to add Employee',
-                });
-            }
-            return res.status(200).json({
-                error: false,
-                message: 'Employee added',
-            });
-        });
-    } catch (err) {
-        console.log('addEmployee Error:');
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed addEmployee' });
-    }
-    return console.log('createEmployee controller executed');
-}
-exports.showSingleEmployee= (req,res)=>{
-    try {
-        const { id } = req.body;
-        db.query('SELECT * FROM employees WHERE id = $1', [id], (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.status(500).json({ error: true, message: 'Failed to fetch employee data' });
-          }
-    
-          if (results.rows.length === 0) {
-            return res.status(404).json({ error: true, message: 'employee not found' });
-          }
-    
-          const {
-            id, name, salary, bonus, EmployeeId
-          } = results.rows[0];
-          const employeeData = {
-            id, name, salary, bonus, EmployeeId
-          };
-    
-          return res.status(200).json({
-            error: false,
-            message: 'employee data retrieved successfully',
-            employeeData,
-          });
-        });
-      } catch (err) {
-        console.log('showSingleEmployee Error:');
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to retrieve Employee data' });
-      }
-      return console.log('showSingleEmployee controller executed');
-}
-
-exports.updateEmployee = async (req, res) => {
->>>>>>> 24b9512c8107fdb2ec2cd54a29529fefc31f8cd3
     const schema = Joi.object({
       name: Joi.string().min(1).required(),
       salary: Joi.number().required(),
@@ -229,7 +104,6 @@ exports.updateEmployee = async (req, res) => {
   }
   return console.log('createEmployee controller executed');
 };
-
 exports.showSingleEmployee = (req, res) => {
   try {
     const { id } = req.body;
@@ -244,10 +118,10 @@ exports.showSingleEmployee = (req, res) => {
       }
 
       const {
-        name, address, manager,
+        id, name, salary, bonus, EmployeeId,
       } = results.rows[0];
       const employeeData = {
-        id, name, address, manager,
+        id, name, salary, bonus, EmployeeId,
       };
 
       return res.status(200).json({
