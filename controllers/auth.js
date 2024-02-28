@@ -77,6 +77,7 @@ exports.login = async (req, res) => {
         message: 'Successful Login',
         token,
         nickname,
+        id
       });
     });
   } catch (err) {
