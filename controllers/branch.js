@@ -73,10 +73,10 @@ exports.showSingleBranch = async (req, res) => {
       }
 
       const {
-        name, address, manager,
+        name, phone, address, managerId,
       } = results.rows[0];
       const branchData = {
-        id, name, address, manager,
+        id, name, phone, address, managerId,
       };
 
       return res.status(200).json({
