@@ -30,10 +30,10 @@ exports.showAllBranch = async (req, res) => {
       }
       let branchData = results.rows.map((branch) => {
         const {
-          id, name, address, manager,
+          id, name, address
         } = branch;
         return {
-          id, name, address, manager,
+          id, name, address
         };
       });
       if (search) {
@@ -102,7 +102,10 @@ exports.createBranch = async (req, res) => {
       name: Joi.string().min(1).required(),
       phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
       address: Joi.string().required(),
+<<<<<<< Updated upstream
       managerId: Joi.number().required(),
+=======
+>>>>>>> Stashed changes
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
 
@@ -114,7 +117,7 @@ exports.createBranch = async (req, res) => {
       });
     }
     const {
-      name, phone, address, managerId,
+      name, phone, address
     } = value;
     db.query('INSERT INTO branches (name, phone, address, managerId,companyId) VALUES ($1,$2,$3,$4,$5)', [name, phone, address, managerId, companyid], (err) => {
       if (err) {
