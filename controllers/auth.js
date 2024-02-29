@@ -77,6 +77,7 @@ exports.login = async (req, res) => {
         message: 'Successful Login',
         token,
         nickname,
+        id
       });
     });
   } catch (err) {
@@ -207,14 +208,6 @@ exports.register = async (req, res) => {
       return res.status(409).json({
         error: true,
         message: 'Email already used',
-      });
-    }
-
-    // Check if passwords match
-    if (password !== passwordConfirm) {
-      return res.status(412).json({
-        error: true,
-        message: 'Passwords does not match',
       });
     }
 
