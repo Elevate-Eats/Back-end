@@ -1,4 +1,3 @@
-const express = require('express');
 const Joi = require('joi');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
@@ -119,7 +118,7 @@ exports.showSingleEmployee = (req, res) => {
       }
 
       const {
-        id, name, salary, bonus, EmployeeId,
+        name, salary, bonus, EmployeeId,
       } = results.rows[0];
       const employeeData = {
         id, name, salary, bonus, EmployeeId,
@@ -177,8 +176,8 @@ exports.updateEmployee = async (req, res) => {
 
 exports.deleteEmployee = async (req, res) => {
   try {
-    const { employeeId } = req.body;
-    db.query('DELETE FROM employees WHERE id = $1 ', [employeeId], (err) => {
+    const { id } = req.body;
+    db.query('DELETE FROM employees WHERE id = $1 ', [id], (err) => {
       if (err) {
         console.log(err);
         return res.status(500).json({

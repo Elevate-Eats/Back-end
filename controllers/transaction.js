@@ -12,10 +12,6 @@ const db = new Pool({
 });
 exports.addTransaction = async (req, res) => {
   try {
-    // const authorizationHeader = req.headers.authorization;
-    // const token = authorizationHeader.split(' ')[1];
-    // const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    // const { companyid } = decoded;
     const { transaction, items } = req.body;
     db.query('Insert INTO transactions(transactionDate, discount, status, paymentMethod, totalPrice,branchId) VALUES ($1, $2, $3, $4, $5, $6)', [transaction.transactionDate, transaction.discount, transaction.status, transaction.paymentMethod, transaction.totalPrice, transaction.branchId], (err) => {
       if (err) {
