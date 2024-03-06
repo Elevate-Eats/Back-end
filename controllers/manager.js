@@ -106,7 +106,7 @@ exports.deleteManager = async (req, res) => {
   } catch (err) {
     console.log('deleteManager Error:');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed deleteManager' });
+    return res.status(500).json({ error: true, message: 'Failed delete Manager' });
   }
   return console.log('deleteManager controller executed');
 };
