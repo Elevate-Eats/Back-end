@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
         message: 'Successful Login',
         token,
         nickname,
-        id
+        id,
       });
     });
   } catch (err) {
@@ -183,9 +183,8 @@ exports.register = async (req, res) => {
       });
     }
     const {
-      company, name, nickname, phone, role, email, password, passwordConfirm,
+      company, name, nickname, phone, role, email, password,
     } = value;
-
     if (apikey !== process.env.API_KEY) {
       return res.status(400).json({ error: true, message: 'API_KEY Invalid' });
     }
