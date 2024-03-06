@@ -157,12 +157,61 @@ exports.updateMenu = async (req, res) => {
         details: error.details.map((x) => x.message),
       });
     }
-    const { id, name, category, basePrice, baseOnlinePrice } = value;
-    db.query('UPDATE menus SET ')
+    const {
+      id, name, category, basePrice, baseOnlinePrice,
+    } = value;
+    db.query('UPDATE menus SET name = $2, category = $3, basePrice = $4, baseOnlinePrice = $5 WHERE  id = $1', [id, name, category, basePrice, baseOnlinePrice], (err) => {
+      if (err) {
+        console.log(' updateMenus Failed, DATABASE Err');
+        return res.status(500).json({
+          error: true,
+          message: 'Failed to Update',
+        });
+      }
+      return res.status(200).json({
+        error: false,
+        message: 'Menu Updated!',
+      });
+    });
   } catch (err) {
     console.log('updateMenu Error');
     console.log(err);
     return res.status(500).json({ error: true, message: 'Failed to update Menu: Server Error' });
   }
-  return console.log('ShowMenus Executed');
+  return console.log('updateMenus Executed');
+};
+
+exports.deleteMenus = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      id: Joi.number().min(1).required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(204).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { id } = value;
+    db.query('DELETE FROM menus WHERE id = $1', [id], (err) => {
+      if (err) {
+        console.log('deleteMenu db Error');
+        return res.status(500).json({
+          error: true,
+          message: 'Failed to deleteMenu',
+        });
+      }
+      return res.status(200).json({
+        error: false,
+        message: 'Menu Deleted!',
+      });
+    });
+  } catch (err) {
+    console.log('deleteMenu Error');
+    console.log(err);
+    return res.status(500).json({ error: true, message: 'Failed to delete Menu: Server Error' });
+  }
+  return console.log('deleteMenus Executed');
 };
