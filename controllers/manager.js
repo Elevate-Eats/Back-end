@@ -19,7 +19,7 @@ exports.showAllManager = async (req, res) => {
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded;
     const { search, limit } = req.query;
-    await db.query('SELECT * FROM users WHERE companyId = $1', [companyid], (err, results) => {
+    db.query('SELECT * FROM users WHERE companyId = $1', [companyid], (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: true, message: 'Failed to fetch manager data' });
@@ -106,7 +106,7 @@ exports.deleteManager = async (req, res) => {
   } catch (err) {
     console.log('deleteManager Error:');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed deleteManager' });
+    return res.status(500).json({ error: true, message: 'Failed delete Manager' });
   }
   return console.log('deleteManager controller executed');
 };
