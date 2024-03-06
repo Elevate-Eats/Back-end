@@ -2,7 +2,7 @@
  *  @swagger
  *  components:
  *    schemas:
- *      showSingleBranch:
+ *      showDelSingleBranch:
  *        type: object
  *        required:
  *          - id
@@ -38,14 +38,6 @@
  *          address: Jl. Godean, Godean, Yogyakarta, DIY
  *          phone: "\uFF0B628533513111"
  *          managerId: 2
- *      deleteBranch:
- *        type: object
- *        required:
- *          - id
- *        properties:
- *          id:
- *            type: integer
- *            description: Branch ID
  *      updateBranch:
  *        type: object
  *        required:
@@ -61,14 +53,14 @@
  *          name:
  *            type: string
  *            description: Branch Name
+ *          phone:
+ *            type: string
+ *            description: Manager Phone Number
+ *            example: "+628533513111"
  *          address:
  *            type: string
  *            description: Branch Address
  *            example: Jl. Godean, Godean, Yogyakarta, DIY
- *          phone:
- *            type: string
- *            description: Manager Phone Number
- *            example: "\uFF0B628533513111"
  *          managerId:
  *            type: integer
  *            description: Manager ID
@@ -76,8 +68,8 @@
  *        example:
  *          id: 10
  *          name: Jogja
+ *          phone: "+628533513111"
  *          address: Jl. Godean, Godean, Yogyakarta, DIY
- *          phone: "\uFF0B628533513111"
  *          managerId: 2
  */
 
@@ -129,6 +121,10 @@
  *              name:
  *                type: string
  *                required: true
+ *              phone:
+ *                type: string
+ *                description: Your Phone Number
+ *                example: "+6281122445566"
  *              address:
  *                type: string
  *                required: true
@@ -231,7 +227,7 @@ router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/showSingleBranch'
+ *                $ref: '#/components/schemas/showDelSingleBranch'
  *        responses:
  *          200:
  *            description: Success
@@ -245,6 +241,7 @@ router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
  *                  branchData:
  *                    id: 10
  *                    name: "Jogjakarta"
+ *                    phone: "+6281122445566"
  *                    address: "Jl. Godean, Godean, Yogyakarta, DIY"
  *          404:
  *            description: Retrieval Failed
@@ -321,7 +318,7 @@ router.post('/addBranch', isLoggedIn, branchController.createBranch);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/deleteBranch'
+ *                $ref: '#/components/schemas/showDelSingleBranch'
  *        responses:
  *          200:
  *            description: Success

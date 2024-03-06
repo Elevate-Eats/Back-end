@@ -166,8 +166,8 @@ router.get('/showEmployees', isLoggedIn, employeeController.showAllEmployee);
  *                  employeeData:
  *                    id: 10
  *                    name: John Doe
- *                    Address: "Jl. Godean, Godean, Yogyakarta, DIY"
- *                    manager: nothibg
+ *                    salary: 100000
+ *                    bonus: 8000
  *          404:
  *            description: Employee not Found
  *            content:

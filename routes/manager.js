@@ -142,7 +142,6 @@ const router = express.Router();
  *                      phone: "+6281122445566"
  *                      email: "user@example.com"
  *                      role: general_manager
- *                      branchAccess: "{all}"
  *          404:
  *            description: Manager not Found
  *            content:
