@@ -110,7 +110,9 @@ exports.deleteManager = async (req, res) => {
   }
   return console.log('deleteManager controller executed');
 };
+
 // Helper for createManager
+
 async function checkEmailExistence(email) {
   return new Promise((resolve, reject) => {
     db.query('SELECT email from users WHERE email = $1', [email], (err, results) => {
