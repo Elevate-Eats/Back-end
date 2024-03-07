@@ -113,7 +113,8 @@ exports.showSingleMenu = async (req, res) => {
       });
     }
     const { id } = value;
-    db.query('SELECT * FROM menus WHERE id = $1', [id], (err, result) => {
+    console.log(id);
+    db.query('SELECT * FROM menus WHERE id = $1', [id], (err, results) => {
       if (err) {
         console.log('showSingleMenu ERROR', err);
         return res.status(500).json({
@@ -121,9 +122,12 @@ exports.showSingleMenu = async (req, res) => {
           message: 'Failed to retrieve menu',
         });
       }
+      if (results.rows.length === 0) {
+        return res.status(404).json({ error: true, message: 'Menu not found' });
+      }
       const {
         name, category, basePrice, baseOnlinePrice,
-      } = result.rows[0];
+      } = results.rows[0];
       const menuData = {
         name, category, basePrice, baseOnlinePrice,
       };
@@ -144,6 +148,7 @@ exports.showSingleMenu = async (req, res) => {
 exports.updateMenu = async (req, res) => {
   try {
     const schema = Joi.object({
+      id: Joi.string().required(),
       name: Joi.string().min(1).required(),
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
