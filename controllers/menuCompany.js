@@ -38,18 +38,18 @@ exports.addMenu = async (req, res) => {
         console.log(err);
         return res.status(500).json({
           error: true,
-          message: 'Failed to addMenu: DB Error',
+          message: 'Failed to addMenu, DB Error',
         });
       }
       return res.status(200).json({
         error: false,
-        message: 'Menu Added',
+        message: 'Menu Added successfully',
       });
     });
   } catch (err) {
     console.log('addProduct Error');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to add Product: Server Error' });
+    return res.status(500).json({ error: true, message: 'Failed to add Product, Server Error' });
   }
   return console.log('addMenu Executed');
 };
@@ -78,12 +78,18 @@ exports.showMenus = async (req, res) => {
         };
       });
       if (search) {
-        menuData = menuData.filter((menu) => menu.name.tolowercase().startswith(
-          search.tolowercase(),
+        menuData = menuData.filter((menu) => menu.name.toLowerCase().startsWith(
+          search.toLowerCase(),
         ));
       }
       if (limit) {
         menuData = menuData.slice(0, Number(limit));
+      }
+      if (menuData.length === 0) {
+        return res.status(404).json({
+          error: true,
+          message: 'Menu not found',
+        });
       }
       return res.status(200).json({
         error: false,
@@ -94,7 +100,7 @@ exports.showMenus = async (req, res) => {
   } catch (err) {
     console.log('showMenus Error');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to show Menus: Server Error' });
+    return res.status(500).json({ error: true, message: 'Failed to show Menus, Server Error' });
   }
   return console.log('ShowMenus Executed');
 };
@@ -126,10 +132,10 @@ exports.showSingleMenu = async (req, res) => {
         return res.status(404).json({ error: true, message: 'Menu not found' });
       }
       const {
-        name, category, basePrice, baseOnlinePrice,
+        name, category, baseprice, baseonlineprice,
       } = results.rows[0];
       const menuData = {
-        name, category, basePrice, baseOnlinePrice,
+        name, category, baseprice, baseonlineprice,
       };
       return res.status(200).json({
         error: false,
@@ -140,7 +146,7 @@ exports.showSingleMenu = async (req, res) => {
   } catch (err) {
     console.log('showMenu Error');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to show Menu: Server Error' });
+    return res.status(500).json({ error: true, message: 'Failed to show Menu, Server Error' });
   }
   return console.log('showSingleMenu Executed');
 };
@@ -181,7 +187,7 @@ exports.updateMenu = async (req, res) => {
   } catch (err) {
     console.log('updateMenu Error');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to update Menu: Server Error' });
+    return res.status(500).json({ error: true, message: 'Failed to update Menu, Server Error' });
   }
   return console.log('updateMenus Executed');
 };
@@ -216,7 +222,7 @@ exports.deleteMenus = async (req, res) => {
   } catch (err) {
     console.log('deleteMenu Error');
     console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to delete Menu: Server Error' });
+    return res.status(500).json({ error: true, message: 'Failed to delete Menu, Server Error' });
   }
   return console.log('deleteMenus Executed');
 };
