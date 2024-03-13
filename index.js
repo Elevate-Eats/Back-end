@@ -79,7 +79,7 @@ app.use('/branch/v1', require('./routes/branch'));
 app.use('/employee/v1/', require('./routes/employee'));
 app.use('/manager/v1/', require('./routes/manager'));
 app.use('/menuCompany/v1/', require('./routes/menuCompany'));
-app.use('/menuBranch/v1/', require('./routes/menuCompany'));
+app.use('/menuBranch/v1/', require('./routes/menuBranch'));
 
 // Start the server
 const port = process.env.API_PORT || 8080;

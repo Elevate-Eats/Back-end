@@ -2,7 +2,7 @@
  *  @swagger
  *  components:
  *    schemas:
- *      addMenu:
+ *      addMenuB:
  *        type: object
  *        required:
  *          - menuId
@@ -35,7 +35,7 @@
  *          category: Menu Utama
  *          basePrice: 57000
  *          baseOnlinePrice: 60000
- *      updateMenu:
+ *      updateMenuB:
  *        type: object
  *        required:
  *          - menuId
@@ -64,11 +64,13 @@
  *            type: number
  *            description: Base Online Price of The Menu
  *        example:
+ *          menuId: 1
+ *          branchId: 2
  *          name: Sate
  *          category: Menu Utama
  *          basePrice: 57000
  *          baseOnlinePrice: 60000
- *      showSingleDelMenu:
+ *      showSingleDelMenuB:
  *        type: object
  *        required:
  *          - menuId
@@ -80,7 +82,7 @@
  *          branchId:
  *            type: number
  *            description: Branch of the Menu
- *      showMenus:
+ *      showMenusB:
  *        type: object
  *        required:
  *          - branchId
@@ -108,7 +110,6 @@
 const express = require('express');
 const { isLoggedIn } = require('../controllers/auth.js');
 const menuBranchController = require('../controllers/menuBranch.js');
-
 const router = express.Router();
 
 /**
@@ -126,7 +127,7 @@ const router = express.Router();
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/showMenus'
+ *                $ref: '#/components/schemas/showMenusB'
  *        responses:
  *          200:
  *            description: Menu Found
@@ -138,9 +139,12 @@ const router = express.Router();
  *                  error: false
  *                  message: menuData retrieved successfully
  *                  MenuData:
- *                    - id: 1
- *                      name: "Sate"
- *                      category: "Menu Utama"
+ *                    - menuid : 4,
+ *                      branchid : 12,
+ *                      name: Sate Tegal 10 Tusuk Campur,
+ *                      category: Menu Utama,
+ *                      baseprice: 56000,
+ *                      baseonlineprice: 60000
  *          404:
  *            description: Menu not Found
  *            content:
@@ -177,7 +181,7 @@ router.post('/showMenus', isLoggedIn, menuBranchController.showMenus);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/showSingleDelMenu'
+ *                $ref: '#/components/schemas/showSingleDelMenuB'
  *        responses:
  *          200:
  *            description: A single menu object
@@ -189,10 +193,12 @@ router.post('/showMenus', isLoggedIn, menuBranchController.showMenus);
  *                  error: false
  *                  message: MenuData retrieved successfully
  *                  menuData:
- *                    name: Sate
- *                    category: Menu Utama
- *                    basePrice: 57000
- *                    baseOnlinePrice: 60000
+ *                    - menuid : 4,
+ *                      branchid : 12,
+ *                      name: Sate Tegal 10 Tusuk Campur,
+ *                      category: Menu Utama,
+ *                      baseprice: 56000,
+ *                      baseonlineprice: 60000
  *          400:
  *            description: Validation Error
  *            content:
@@ -239,7 +245,7 @@ router.post('/showSingleMenu', isLoggedIn, menuBranchController.showSingleMenu);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/addMenu'
+ *                $ref: '#/components/schemas/addMenuB'
  *        responses:
  *          200:
  *            description: Menu added successfully
@@ -287,7 +293,7 @@ router.post('/addMenu', isLoggedIn, menuBranchController.addMenu);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/updateMenu'
+ *                $ref: '#/components/schemas/updateMenuB'
  *        responses:
  *          200:
  *            description: Menu updated successfully
@@ -335,7 +341,7 @@ router.post('/updateMenu', isLoggedIn, menuBranchController.updateMenu);
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- *                $ref: '#/components/schemas/showSingleDelMenu'
+ *                $ref: '#/components/schemas/showSingleDelMenuB'
  *        responses:
  *          200:
  *            description: Menu deleted successfully

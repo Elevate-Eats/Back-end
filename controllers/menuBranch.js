@@ -16,8 +16,8 @@ exports.addMenu = async (req, res) => {
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
       baseOnlinePrice: Joi.number().required(),
-      menuId: Joi.number().required(),
-      branchId: Joi.number().required(),
+      menuId: Joi.number().min(1).required(),
+      branchId: Joi.number().min(1).required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -54,7 +54,7 @@ exports.addMenu = async (req, res) => {
 exports.showMenus = async (req, res) => {
   try {
     const { branchid } = req.body;
-    const { search, limit } = req.query;
+    const { search, limit } = req.body;
     db.query('SELECT * FROM menubranch WHERE branchid = $1', [branchid], (err, result) => {
       if (err) {
         console.log(err);
@@ -65,10 +65,10 @@ exports.showMenus = async (req, res) => {
       }
       let menuData = result.rows.map((menu) => {
         const {
-          id, name, category,
+          menuid, name, category, baseprice, baseonlineprice,
         } = menu;
         return {
-          id, name, category,
+          menuid, branchid, name, category, baseprice, baseonlineprice,
         };
       });
       if (search) {
@@ -126,10 +126,10 @@ exports.showSingleMenu = async (req, res) => {
         return res.status(404).json({ error: true, message: 'Menu not found' });
       }
       const {
-        name, category, baseprice, baseonlineprice,
+        menuid, branchid, name, category, baseprice, baseonlineprice,
       } = results.rows[0];
       const menuData = {
-        name, category, baseprice, baseonlineprice,
+        menuid, branchid, name, category, baseprice, baseonlineprice,
       };
       return res.status(200).json({
         error: false,
@@ -148,8 +148,8 @@ exports.showSingleMenu = async (req, res) => {
 exports.updateMenu = async (req, res) => {
   try {
     const schema = Joi.object({
-      menuId: Joi.number().required(),
-      branchId: Joi.number().required(),
+      menuId: Joi.number().min(1).required(),
+      branchId: Joi.number().min(1).required(),
       name: Joi.string().min(1).required(),
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
