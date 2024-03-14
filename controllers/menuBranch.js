@@ -53,8 +53,22 @@ exports.addMenu = async (req, res) => {
 
 exports.showMenus = async (req, res) => {
   try {
-    const { branchid } = req.body;
-    const { search, limit } = req.body;
+    const schema = Joi.object({
+      search: Joi.string().required(),
+      limit: Joi.number.required(),
+      branchid: Joi.number.required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(204).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const {
+      search, limit, branchid,
+    } = value;
     db.query('SELECT * FROM menubranch WHERE branchid = $1', [branchid], (err, result) => {
       if (err) {
         console.log(err);
