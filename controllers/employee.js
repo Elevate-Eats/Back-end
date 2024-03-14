@@ -174,6 +174,11 @@ exports.updateEmployee = async (req, res) => {
   return console.log('updateEmployee controller executed');
 };
 
+exports.updateEmployeesBranch = async (req,res) =>{
+  const schema = Joi.object({
+    id: Joi.array().items(Joi.number())
+  });
+}
 exports.deleteEmployee = async (req, res) => {
   try {
     const { id } = req.body;
