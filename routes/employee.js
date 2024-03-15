@@ -52,6 +52,21 @@
  *          salary: 5000
  *          bonus: 500
  *          branchId: 5
+ *      updateEmployeesBranch:
+ *        type: object
+ *        required:
+ *          - employeeIds
+ *          - branchId
+ *        properties:
+ *          employeeIds:
+ *            type: array
+ *            description: An array of Employee IDs to update their branch ID
+ *          branchId:
+ *            type: integer
+ *            description: The new Branch ID to assign to all listed employees
+ *        example:
+ *          employeeIds: [10, 14, 20]
+ *          branchId: 3
  *      showSingleDelEmployee:
  *        type: object
  *        required:
@@ -313,4 +328,41 @@ router.post('/deleteEmployee', isLoggedIn, employeeController.deleteEmployee);
  */
 router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
 
+/**
+ *  @swagger
+ *  paths:
+ *    /employee/v1/updateEmployeesBranch:
+ *      post:
+ *        summary: Updates employee's Branch
+ *        tags:
+ *          - Employee
+ *        security:
+ *          - bearerAuth: []
+ *        requestBody:
+ *          required: true
+ *          content:
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/updateEmployeesBranch'
+ *        responses:
+ *          200:
+ *            description: Employees Branch Id Updated successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: false
+ *                  message: Employees Branch Id Updated
+ *          500:
+ *            description: Employee update failed
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: Failed Update EmployeeBranch
+ */
+router.post('/updateEmployeesBranch', isLoggedIn, employeeController.updateEmployeesBranch);
 module.exports = router;

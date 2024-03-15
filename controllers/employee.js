@@ -174,11 +174,33 @@ exports.updateEmployee = async (req, res) => {
   return console.log('updateEmployee controller executed');
 };
 
-exports.updateEmployeesBranch = async (req,res) =>{
-  const schema = Joi.object({
-    id: Joi.array().items(Joi.number())
-  });
-}
+exports.updateEmployeesBranch = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      employeeIds: Joi.array().items(Joi.number()),
+      branchId: Joi.number().min(1).required(),
+    });
+    const { error, value } = schema.validate(req.body, ({ abortEarly: false }));
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { employeeIds, branchId } = value;
+    const updatePromises = employeeIds.map((employeeId) => db.query('UPDATE employees SET branchid = $2 WHERE id = $1', [employeeId, branchId]));
+    await Promise.all(updatePromises);
+    return res.status(200).json({
+      error: false,
+      message: 'Employees Branch Id Updated',
+    });
+  } catch (err) {
+    console.log('employeeBranchUpdate Error:');
+    console.log(err);
+    return res.status(500).json({ error: true, message: 'Failed Update EmployeeBranch' });
+  }
+};
 exports.deleteEmployee = async (req, res) => {
   try {
     const { id } = req.body;
