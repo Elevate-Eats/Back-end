@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
 
 const db = new Pool({
   user: process.env.PG_USER,
@@ -11,6 +12,10 @@ const db = new Pool({
 
 exports.addTransaction = async (req, res) => {
   try {
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader.split(' ')[1];
+    const decoded = jwt.decode(token, process.env.JWT_SECRET);
+    const { companyid } = decoded;
     const schema = Joi.object({
       transactiondate: Joi.date().iso().required(),
       discount: Joi.number().required(),
@@ -40,7 +45,7 @@ exports.addTransaction = async (req, res) => {
       tableNumber,
     } = value;
     const result = await db.query(
-      'INSERT INTO transactions (transactiondate, discount, status, paymentmethod, totalprice, branchid, customername, tablenumber) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      'INSERT INTO transactions (transactiondate, discount, status, paymentmethod, totalprice, branchid, customername, tablenumber, companyid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       [
         transactiondate,
         discount,
@@ -50,6 +55,7 @@ exports.addTransaction = async (req, res) => {
         branchid,
         customername,
         tableNumber,
+        companyid,
       ],
     );
     const { id } = result.rows[0];
@@ -98,10 +104,15 @@ exports.deleteTransaction = async (req, res) => {
 // To Update
 exports.showTransactions = async (req, res) => {
   try {
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader.split(' ')[1];
+    const decoded = jwt.decode(token, process.env.JWT_SECRET);
+    const { companyid } = decoded;
     const schema = Joi.object({
-      search: Joi.string().required(),
-      limit: Joi.number().required(),
-      branchid: Joi.number().required(),
+      search: Joi.string(),
+      limit: Joi.number(),
+      branch: Joi.number(),
+      transactionStatus: Joi.string(),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
@@ -112,12 +123,29 @@ exports.showTransactions = async (req, res) => {
       });
     }
     const {
-      search, limit, branchid,
+      search, limit, branch, transactionStatus,
     } = value;
-    const results = await db.query('SELECT * FROM transactions WHERE branchid = $1 AND status = "pending"', [branchid]);
+    let results;
+    if (branch) {
+      if (transactionStatus) {
+        results = await db.query('SELECT * FROM transactions WHERE branchid = $1 AND status = $2', [branch, transactionStatus]);
+      } else {
+        results = await db.query('SELECT * FROM transactions WHERE branchid = $1', [branch]);
+      }
+    } else {
+      results = await db.query('SELECT * FROM transactions WHERE companyid = $1', [companyid]);
+    }
     let transactionData = results.rows.map((transaction) => {
       const {
-        id, transactiondate, discount, status, paymentmethod, totalprice, customername, tableNumber,
+        id,
+        transactiondate,
+        discount,
+        status,
+        paymentmethod,
+        totalprice,
+        branchid,
+        customername,
+        tableNumber,
       } = transaction;
       return {
         id,
@@ -132,9 +160,11 @@ exports.showTransactions = async (req, res) => {
       };
     });
     if (search) {
-      transactionData = transactionData.filter((branch) => branch.name.toLowerCase().startsWith(
-        search.toLowerCase(),
-      ));
+      transactionData = transactionData.filter((transaction) => transaction.customername
+        .toLowerCase()
+        .startsWith(
+          search.toLowerCase(),
+        ));
     }
     if (limit) {
       transactionData = transactionData.slice(0, Number(limit));
@@ -149,6 +179,55 @@ exports.showTransactions = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Failed to ShowTransaction, Server Error',
+    });
+  }
+};
+
+exports.showSingleTransaction = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { id } = value;
+    const result = await db.query('SELECT * FROM transactions WHERE id = $1', [id]);
+    const {
+      transactiondate,
+      discount,
+      status,
+      paymentmethod,
+      totalprice,
+      branchid,
+      customername,
+      tableNumber,
+    } = result.rows[0];
+    const transactionData = {
+      transactiondate,
+      discount,
+      status,
+      paymentmethod,
+      totalprice,
+      branchid,
+      customername,
+      tableNumber,
+    };
+    return res.status(200).json({
+      error: false,
+      message: 'Transaction Data Retrieved',
+      transactionData,
+    });
+  } catch (err) {
+    console.log('showSingleTransaction Failed \n', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Failed to showSingleTransaction, Server Error',
     });
   }
 };
@@ -168,7 +247,7 @@ exports.updateTransaction = async (req, res) => {
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
         message: 'Validation error',
         details: error.details.map((x) => x.message),
