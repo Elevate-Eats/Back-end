@@ -61,6 +61,8 @@
  *          employeeIds:
  *            type: array
  *            description: An array of Employee IDs to update their branch ID
+ *            items:
+ *              type: number
  *          branchId:
  *            type: integer
  *            description: The new Branch ID to assign to all listed employees
@@ -341,7 +343,7 @@ router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
  *        requestBody:
  *          required: true
  *          content:
- *            application/x-www-form-urlencoded:
+ *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/updateEmployeesBranch'
  *        responses:
