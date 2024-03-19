@@ -80,7 +80,8 @@ app.use('/employee/v1/', require('./routes/employee'));
 app.use('/manager/v1/', require('./routes/manager'));
 app.use('/menuCompany/v1/', require('./routes/menuCompany'));
 app.use('/menuBranch/v1/', require('./routes/menuBranch'));
-
+app.use('/item/v1/', require('./routes/items'));
+app.use('/transaction/v1/', require('./routes/transaction'));
 // Start the server
 const port = process.env.API_PORT || 8080;
 app.listen(port, () => {

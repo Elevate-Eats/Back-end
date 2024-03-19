@@ -12,12 +12,14 @@ const db = new Pool({
 exports.addTransaction = async (req, res) => {
   try {
     const schema = Joi.object({
-      transactiondate: Joi.string().required(),
+      transactiondate: Joi.date().iso().required(),
       discount: Joi.number().required(),
       status: Joi.number().required(),
       paymentmethod: Joi.number().required(),
       totalprice: Joi.number().required(),
       branchid: Joi.number().required(),
+      customername: Joi.string().required(),
+      tableNumber: Joi.number().required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -28,11 +30,27 @@ exports.addTransaction = async (req, res) => {
       });
     }
     const {
-      transactiondate, discount, status, paymentmethod, totalprice, branchid,
+      transactiondate,
+      discount,
+      status,
+      paymentmethod,
+      totalprice,
+      branchid,
+      customername,
+      tableNumber,
     } = value;
     const result = await db.query(
-      'INSERT INTO menus (transactiondate, discount, status, paymentmethod, totalprice, branchid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [transactiondate, discount, status, paymentmethod, totalprice, branchid],
+      'INSERT INTO transactions (transactiondate, discount, status, paymentmethod, totalprice, branchid, customername, tablenumber) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [
+        transactiondate,
+        discount,
+        status,
+        paymentmethod,
+        totalprice,
+        branchid,
+        customername,
+        tableNumber,
+      ],
     );
     const { id } = result.rows[0];
     return res.status(200).json({
@@ -77,16 +95,17 @@ exports.deleteTransaction = async (req, res) => {
   }
 };
 
+// To Update
 exports.showTransactions = async (req, res) => {
   try {
     const schema = Joi.object({
       search: Joi.string().required(),
-      limit: Joi.number.required(),
-      branchid: Joi.number.required(),
+      limit: Joi.number().required(),
+      branchid: Joi.number().required(),
     });
-    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
         message: 'Validation error',
         details: error.details.map((x) => x.message),
@@ -98,10 +117,18 @@ exports.showTransactions = async (req, res) => {
     const results = await db.query('SELECT * FROM transactions WHERE branchid = $1 AND status = "pending"', [branchid]);
     let transactionData = results.rows.map((transaction) => {
       const {
-        id, transactiondate, discount, status, paymentmethod, totalprice,
+        id, transactiondate, discount, status, paymentmethod, totalprice, customername, tableNumber,
       } = transaction;
       return {
-        id, transactiondate, discount, status, paymentmethod, totalprice, branchid,
+        id,
+        transactiondate,
+        discount,
+        status,
+        paymentmethod,
+        totalprice,
+        branchid,
+        customername,
+        tableNumber,
       };
     });
     if (search) {
@@ -126,4 +153,62 @@ exports.showTransactions = async (req, res) => {
   }
 };
 
-exports.
+exports.updateTransaction = async (req, res) => {
+  try {
+    const schema = Joi.object({
+      id: Joi.number().required(),
+      transactiondate: Joi.date().iso().required(),
+      discount: Joi.number().required(),
+      status: Joi.number().required(),
+      paymentmethod: Joi.number().required(),
+      totalprice: Joi.number().required(),
+      branchid: Joi.number().required(),
+      customername: Joi.string().required(),
+      tableNumber: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(204).json({
+        error: true,
+        message: 'Validation error',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const {
+      transactiondate,
+      discount,
+      status,
+      paymentmethod,
+      totalprice,
+      branchid,
+      customername,
+      tableNumber,
+      id,
+    } = value;
+    await db.query(
+      'UPDATE transactions SET transactiondate = $1, discount = $2, status = $3, paymentmethod = $4, totalprice = $5, branchid = $6, customername = $7, tablenumber = $8 WHERE id = $9',
+      [
+        transactiondate,
+        discount,
+        status,
+        paymentmethod,
+        totalprice,
+        branchid,
+        customername,
+        tableNumber,
+        id,
+      ],
+    );
+    return res.status(200).json({
+      error: false,
+      message: 'Transaction Updated!',
+      id,
+    });
+  } catch (err) {
+    console.log('UpdateTransaction Failed \n', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Failed to updateTransaction, Server Error',
+    });
+  }
+};

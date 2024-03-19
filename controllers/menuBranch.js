@@ -54,9 +54,9 @@ exports.addMenu = async (req, res) => {
 exports.showMenus = async (req, res) => {
   try {
     const schema = Joi.object({
-      search: Joi.string().required(),
-      limit: Joi.number.required(),
-      branchid: Joi.number.required(),
+      search: Joi.string(),
+      limit: Joi.number(),
+      branchid: Joi.number().required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
