@@ -177,8 +177,8 @@ exports.updateEmployee = async (req, res) => {
 exports.updateEmployeesBranch = async (req, res) => {
   try {
     const schema = Joi.object({
-      employeeIds: Joi.array().items(Joi.number()),
-      branchId: Joi.number().min(1).required(),
+      employeeIds: Joi.array().items(Joi.number().required()).required(),
+      branchId: Joi.number().min(1).allow(null), // Allow 'null' for unassigning the employee
     });
     const { error, value } = schema.validate(req.body, ({ abortEarly: false }));
     if (error) {
@@ -201,6 +201,7 @@ exports.updateEmployeesBranch = async (req, res) => {
     return res.status(500).json({ error: true, message: 'Failed Update EmployeeBranch' });
   }
 };
+
 exports.deleteEmployee = async (req, res) => {
   try {
     const { id } = req.body;
