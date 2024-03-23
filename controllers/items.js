@@ -14,9 +14,9 @@ exports.showItems = async (req, res) => {
     const schema = Joi.object({
       transactionId: Joi.number().min(1).required(),
     });
-    const { error, value } = schema.validate(req.params, { abortEarly: false });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
         message: 'Validation error',
         details: error.details.map((x) => x.message),
@@ -26,10 +26,10 @@ exports.showItems = async (req, res) => {
     const results = await db.query('SELECT * FROM items WHERE transactionid = $1', [transactionId]);
     const itemData = results.rows.map((item) => {
       const {
-        id, count, price, totalprice,
+        id, count, price, totalprice, menuid, category, pricingcategory,
       } = item;
       return {
-        id, count, price, totalprice,
+        id, count, price, totalprice, menuid, transactionId, category, pricingcategory,
       };
     });
     return res.status(200).json({
