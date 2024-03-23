@@ -71,10 +71,10 @@ exports.showSingleManager = async (req, res) => {
       }
 
       const {
-        name, phone, email, role, branchAccess,
+        name, nickname, phone, email, role, branchAccess,
       } = results.rows[0];
       const managerData = {
-        id, name, phone, email, role, branchAccess,
+        id, name, nickname, phone, email, role, branchAccess,
       };
 
       return res.status(200).json({
