@@ -9,6 +9,9 @@
  *          - menuid
  *          - pricingcategory
  *          - transactionid
+ *          - price
+ *          - totalPrice
+ *          - category
  *        properties:
  *          count:
  *            type: number
@@ -22,11 +25,23 @@
  *          transactionid:
  *            type: number
  *            description: The unique identifier of the transaction
+ *          price:
+ *            type: number
+ *            description: Price of the Item
+ *          totalPrice:
+ *            type: number
+ *            description: Total price of the item with the count
+ *          category:
+ *            type: string
+ *            description: category of the item
  *        example:
  *          count: 2
  *          menuid: 4
  *          pricingcategory: 'base'
  *          transactionid: 1
+ *          price: 50000
+ *          totalprice: 100000
+ *          category: Makanan
  *      updateItems:
  *        type: object
  *        required:
@@ -83,10 +98,18 @@
  *          pricingcategory:
  *            type: string
  *            description: The updated pricing category for the item
+ *          price:
+ *            type: number
+ *            description: Price of the Item
+ *          totalPrice:
+ *            type: number
+ *            description: Total price of the item with the count
  *        example:
  *          id: 1
  *          count: 4
  *          pricingcategory: 'base'
+ *          price: 20000
+ *          totalPrice: 80000
  */
 
 /**
@@ -180,13 +203,19 @@ router.get('/showItems', isLoggedIn, itemsController.showItems);
  *                  summary: An array of items
  *                  value:
  *                    - count: 2
- *                      menuid: 4
+ *                      menuid: 1
  *                      pricingcategory: 'base'
  *                      transactionid: 1
+ *                      price: 20000
+ *                      totalprice: 40000
+ *                      category: Makanan
  *                    - count: 3
- *                      menuid: 5
+ *                      menuid: 3
  *                      pricingcategory: 'online'
  *                      transactionid: 2
+ *                      price: 10000
+ *                      totalprice: 30000
+ *                      category: Makanan
  *        responses:
  *          200:
  *            description: Item added successfully

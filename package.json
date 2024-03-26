@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "resetdb": "node resetDatabase.js && echo 'Database reset successfully.' && npx knex migrate:latest && echo 'Migration completed.' && npx knex seed:run && echo 'Seeding completed.'"
   },
   "repository": {
     "type": "git",

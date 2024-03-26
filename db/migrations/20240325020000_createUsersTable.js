@@ -10,7 +10,6 @@ exports.up = function (knex) {
     table.string('nickname', 50);
     table.string('email', 100).unique();
     table.string('password', 100);
-    // Assuming 'roles' is an enum type you've defined elsewhere in your database
     table.enu('role', ['general_manager', 'area_manager', 'store_manager']);
     table.string('branchaccess', 100);
     table.integer('companyid').references('id').inTable('companies');
