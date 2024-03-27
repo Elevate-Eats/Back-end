@@ -14,9 +14,9 @@ exports.showItems = async (req, res) => {
     const schema = Joi.object({
       transactionId: Joi.number().min(1).required(),
     });
-    const { error, value } = schema.validate(req.params, { abortEarly: false });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
         message: 'Validation error',
         details: error.details.map((x) => x.message),
@@ -26,10 +26,10 @@ exports.showItems = async (req, res) => {
     const results = await db.query('SELECT * FROM items WHERE transactionid = $1', [transactionId]);
     const itemData = results.rows.map((item) => {
       const {
-        id, count, price, totalprice,
+        id, count, price, totalprice, menuid, category, pricingcategory,
       } = item;
       return {
-        id, count, price, totalprice,
+        id, count, price, totalprice, menuid, transactionId, category, pricingcategory,
       };
     });
     return res.status(200).json({
@@ -47,11 +47,12 @@ exports.addItems = async (req, res) => {
   try {
     const itemSchema = Joi.object({
       count: Joi.number().min(1).required(),
-      menuid: Joi.number().min(1).required(),
-      pricingcategory: Joi.string().required(),
-      transactionid: Joi.number().min(1).required(),
-      // price: Joi.number().min(1).required(),
-      // totalprice: Joi.number().min(1).required(),
+      menuId: Joi.number().min(1).required(),
+      pricingCategory: Joi.string().required(),
+      transactionId: Joi.number().min(1).required(),
+      price: Joi.number().min(1).required(),
+      totalPrice: Joi.number().min(1).required(),
+      category: Joi.string().required(),
     });
     const schema = Joi.array().items(itemSchema).min(1).required();
     const { error, value } = schema.validate(req.body, { abortEarly: false });
@@ -63,10 +64,10 @@ exports.addItems = async (req, res) => {
       });
     }
     const insertPromises = value.map(({
-      count, menuid, pricingcategory, transactionid,
+      count, menuId, pricingCategory, transactionId, price, totalPrice, category,
     }) => db.query(
-      'INSERT INTO items (count, menuid, pricingcategory, transactionid) VALUES ($1,$2,$3,$4)',
-      [count, menuid, pricingcategory, transactionid],
+      'INSERT INTO items (count, menuid, pricingcategory, transactionid, price, totalprice, category) VALUES ($1,$2,$3,$4)',
+      [count, menuId, pricingCategory, transactionId, price, totalPrice, category],
     ));
     await Promise.all(insertPromises);
     return res.status(200).json({
@@ -113,8 +114,8 @@ exports.updateItems = async (req, res) => {
       id: Joi.number().min(1).required(),
       count: Joi.number().min(1).required(),
       pricingcategory: Joi.string().required(),
-      // price: Joi.number().min(1).required(),
-      // totalprice: Joi.number().min(1).required(),
+      price: Joi.number().min(1).required(),
+      totalPrice: Joi.number().min(1).required(),
     });
     const schema = Joi.array().items(itemSchema).min(1).required();
     const { error, value } = schema.validate(req.body, { abortEarly: false });
@@ -126,10 +127,10 @@ exports.updateItems = async (req, res) => {
       });
     }
     const updatePromises = value.map(({
-      id, count, pricingcategory,
+      id, count, pricingcategory, price, totalPrice,
     }) => db.query(
-      'UPDATE items SET count = $2, pricingcategory = $3 WHERE id = $1',
-      [id, count, pricingcategory],
+      'UPDATE items SET count = $2, pricingcategory = $3, price = $4, totalprice = $5 WHERE id = $1',
+      [id, count, pricingcategory, price, totalPrice],
     ));
     await Promise.all(updatePromises);
     return res.status(200).json({
