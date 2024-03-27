@@ -18,7 +18,6 @@ exports.up = function (knex) {
       .onDelete('NO ACTION');
 
     // Assuming managerid is a foreign key, you would similarly set up a foreign key constraint
-    // If 'managers' is the table and 'id' is the reference column in that table
     // table.foreign('managerid').references('id').inTable('managers')
     // .onUpdate('NO ACTION').onDelete('NO ACTION');
   });
