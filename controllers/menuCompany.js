@@ -154,7 +154,7 @@ exports.showSingleMenu = async (req, res) => {
 exports.updateMenu = async (req, res) => {
   try {
     const schema = Joi.object({
-      id: Joi.string().required(),
+      id: Joi.number().required(),
       name: Joi.string().min(1).required(),
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
@@ -162,7 +162,7 @@ exports.updateMenu = async (req, res) => {
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
         message: 'Validation error',
         details: error.details.map((x) => x.message),
