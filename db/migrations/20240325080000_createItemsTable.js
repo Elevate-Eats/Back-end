@@ -13,6 +13,8 @@ exports.up = function (knex) {
     table.integer('transactionid').unsigned();
     table.string('category');
     table.string('pricingcategory');
+    table.index('transactionid');
+    table.index(['transactionid', 'menuid'], 'idx_items_on_transaction_menu');
     // Foreign key constraints
     table.foreign('menuid').references('id').inTable('menus').onUpdate('NO ACTION')
       .onDelete('NO ACTION');

@@ -6,8 +6,8 @@
 exports.up = function (knex) {
   return knex.schema.createTable('completetransactions', (table) => {
     table.increments('id').primary(); // Automatically managed auto-incrementing ID
-    table.integer('transaction_id').unsigned().notNullable();
-    table.foreign('transaction_id').references('transactions.id');
+    table.integer('transactionid').unsigned().notNullable();
+    table.foreign('transactionid').references('transactions.id');
     table.timestamp('completed_at').defaultTo(knex.fn.now());
   });
 };
