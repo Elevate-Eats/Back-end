@@ -179,7 +179,7 @@ const router = express.Router();
  *                  error: true
  *                  message: Failed to retrieve transaction data
  */
-router.get('/showTransaction', isLoggedIn, transactionController.showTransactions);
+router.get('/showTransactions', isLoggedIn, transactionController.showTransactions);
 
 /**
  *  @swagger
