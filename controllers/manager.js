@@ -2,8 +2,7 @@ const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
-// const nodemailer = require('nodemailer');
-// const shortid = require('shortid');
+
 const db = new Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,

@@ -6,7 +6,6 @@ const { Pool } = require('pg');
 // const nodemailer = require('nodemailer');
 // const shortid = require('shortid');
 
-// Database Connection
 const db = new Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
