@@ -25,7 +25,7 @@ exports.recordTransaction = async (req, res) => {
     const {
       transactionId,
     } = value;
-    await db.query('INSERT INTO completeTransaction (transactionid) VALUES ($1)', [transactionId]);
+    await db.query('INSERT INTO completetransactions (transactionid) VALUES ($1)', [transactionId]);
     return res.status(200).json({
       error: false,
       message: 'Transaction Recorded successfully',
@@ -37,7 +37,7 @@ exports.recordTransaction = async (req, res) => {
   }
 };
 
-exports.showdailysummary = async (req, res) => {
+exports.showDailySummary = async (req, res) => {
   try {
     const schema = Joi.object({
       branchId: Joi.number().min(1).required(),
@@ -86,7 +86,7 @@ exports.showdailysummary = async (req, res) => {
   }
 };
 
-exports.showitemssummary = async (req, res) => {
+exports.showItemsSummary = async (req, res) => {
   try {
     const schema = Joi.object({
       branchId: Joi.number().min(1).required(),
@@ -102,7 +102,7 @@ exports.showitemssummary = async (req, res) => {
       });
     }
     const { branchId, startDate, endDate } = value;
-    const results = await db.query('SELECT * FROM dailyitemsanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
+    const results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
     const data = results.rows.map((dailyAnalytics) => {
       const {
         id,
