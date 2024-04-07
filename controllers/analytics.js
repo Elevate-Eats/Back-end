@@ -53,7 +53,23 @@ exports.showDailySummary = async (req, res) => {
       });
     }
     const { branchId, startDate, endDate } = value;
-    const results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
+    let results;
+    if (branchId && startDate && endDate) {
+      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
+    } else if (branchId && startDate && !endDate) {
+      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date >= $2 ORDER BY date ASC', [branchId, startDate]);
+    } else if (branchId && !startDate && endDate) {
+      // Only branchId and endDate are provided
+      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date <= $2 ORDER BY date ASC', [branchId, endDate]);
+    } else if (branchId && !startDate && !endDate) {
+      // Only branchId is provided
+      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 ORDER BY date ASC', [branchId]);
+    } else {
+      return res.status(400).json({
+        error: true,
+        message: 'Missing or incorrect query parameters.',
+      });
+    }
     const data = results.rows.map((dailyAnalytics) => {
       const {
         id,
@@ -92,6 +108,7 @@ exports.showItemsSummary = async (req, res) => {
       branchId: Joi.number().min(1).required(),
       startDate: Joi.date(),
       endDate: Joi.date(),
+      menuId: Joi.number().min(1).required(),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
@@ -101,8 +118,28 @@ exports.showItemsSummary = async (req, res) => {
         details: error.details.map((x) => x.message),
       });
     }
-    const { branchId, startDate, endDate } = value;
-    const results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
+    const {
+      branchId, startDate, endDate, menuId,
+    } = value;
+    let results;
+    if (branchId && startDate && endDate && menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate, menuId]);
+    } else if (branchId && startDate && !endDate && menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date >= $2 ORDER BY date ASC', [branchId, startDate, menuId]);
+    } else if (branchId && !startDate && endDate && menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date <= $2 ORDER BY date ASC', [branchId, endDate, menuId]);
+    } else if (branchId && !startDate && !endDate && menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $2 ORDER BY date ASC', [branchId, menuId]);
+    } else if (!branchId && menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE menuId = $1 ORDER BY date ASC', [menuId]);
+    } else if (branchId && !startDate && !endDate && !menuId) {
+      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 ORDER BY date ASC', [branchId]);
+    } else {
+      return res.status(400).json({
+        error: true,
+        message: 'Missing or incorrect query parameters.',
+      });
+    }
     const data = results.rows.map((dailyAnalytics) => {
       const {
         id,
