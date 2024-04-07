@@ -193,7 +193,7 @@ router.get('/showItems', isLoggedIn, itemsController.showItems);
  *        requestBody:
  *          required: true
  *          content:
- *            application/x-www-form-urlencoded:
+ *            application/json:
  *              schema:
  *                type: array
  *                items:
@@ -203,18 +203,18 @@ router.get('/showItems', isLoggedIn, itemsController.showItems);
  *                  summary: An array of items
  *                  value:
  *                    - count: 2
- *                      menuid: 1
- *                      pricingcategory: 'base'
- *                      transactionid: 1
+ *                      menuId: 1
+ *                      pricingCategory: 'base'
+ *                      transactionId: 1
  *                      price: 20000
- *                      totalprice: 40000
+ *                      totalPrice: 40000
  *                      category: Makanan
  *                    - count: 3
- *                      menuid: 3
- *                      pricingcategory: 'online'
- *                      transactionid: 2
+ *                      menuId: 3
+ *                      pricingCategory: 'online'
+ *                      transactionId: 2
  *                      price: 10000
- *                      totalprice: 30000
+ *                      totalPrice: 30000
  *                      category: Makanan
  *        responses:
  *          200:

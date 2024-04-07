@@ -45,6 +45,7 @@ exports.showItems = async (req, res) => {
 };
 exports.addItems = async (req, res) => {
   try {
+    console.log(req.body);
     const itemSchema = Joi.object({
       count: Joi.number().min(1).required(),
       menuId: Joi.number().min(1).required(),
@@ -66,7 +67,7 @@ exports.addItems = async (req, res) => {
     const insertPromises = value.map(({
       count, menuId, pricingCategory, transactionId, price, totalPrice, category,
     }) => db.query(
-      'INSERT INTO items (count, menuid, pricingcategory, transactionid, price, totalprice, category) VALUES ($1,$2,$3,$4)',
+      'INSERT INTO items (count, menuid, pricingcategory, transactionid, price, totalprice, category) VALUES ($1,$2,$3,$4,$5,$6,$7)',
       [count, menuId, pricingCategory, transactionId, price, totalPrice, category],
     ));
     await Promise.all(insertPromises);
