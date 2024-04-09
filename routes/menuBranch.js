@@ -117,18 +117,28 @@ const router = express.Router();
  *  @swagger
  *  paths:
  *    /menuBranch/v1/showMenus:
- *      post:
+ *      get:
  *        summary: Returns a list of menus
  *        tags:
  *          - menuBranch
  *        security:
  *          - bearerAuth: []
- *        requestBody:
- *          required: true
- *          content:
- *            application/x-www-form-urlencoded:
- *              schema:
- *                $ref: '#/components/schemas/showMenusB'
+ *        parameters:
+ *          - in: query
+ *            name: search
+ *            schema:
+ *              type: string
+ *            description: Find Menu Data base of Keyword
+ *          - in: query
+ *            name: limit
+ *            schema:
+ *              type: integer
+ *            description: Show limited Number of Menus
+ *          - in: query
+ *            name: branchid
+ *            schema:
+ *              type: integer
+ *            description: Id of the branch
  *        responses:
  *          200:
  *            description: Menu Found

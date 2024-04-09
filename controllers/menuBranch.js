@@ -12,7 +12,7 @@ const db = new Pool({
 exports.addMenu = async (req, res) => {
   try {
     const schema = Joi.object({
-      name: Joi.string().min(1).required(),
+      name: Joi.string().required(),
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
       baseOnlinePrice: Joi.number().required(),
@@ -58,7 +58,7 @@ exports.showMenus = async (req, res) => {
       limit: Joi.number(),
       branchid: Joi.number().required(),
     });
-    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
       return res.status(204).json({
         error: true,
