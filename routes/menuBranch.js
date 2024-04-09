@@ -175,7 +175,7 @@ const router = express.Router();
  *                  error: true
  *                  message: Failed to show Menus, Server Error
  */
-router.post('/showMenus', isLoggedIn, menuBranchController.showMenus);
+router.get('/showMenus', isLoggedIn, menuBranchController.showMenus);
 
 /**
  *  @swagger
