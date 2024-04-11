@@ -341,7 +341,6 @@ router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransa
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
- * 
  *                $ref: '#/components/schemas/updateTransaction'
  *        responses:
  *          200:
