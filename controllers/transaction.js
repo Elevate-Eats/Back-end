@@ -18,13 +18,13 @@ exports.addTransaction = async (req, res) => {
     const { companyid } = decoded;
     const schema = Joi.object({
       transactiondate: Joi.date().iso().required(),
-      discount: Joi.number().required(),
+      discount: Joi.number().allow(null),
       status: Joi.number().required(),
-      paymentmethod: Joi.number().required(),
-      totalprice: Joi.number().required(),
+      paymentmethod: Joi.number().allow(null),
+      totalprice: Joi.number().allow(null),
       branchid: Joi.number().required(),
-      customername: Joi.string().required(),
-      tableNumber: Joi.number().required(),
+      customername: Joi.string().allow('', null), // Allowing empty string and null
+      tableNumber: Joi.number().allow(null),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -237,13 +237,13 @@ exports.updateTransaction = async (req, res) => {
     const schema = Joi.object({
       id: Joi.number().required(),
       transactiondate: Joi.date().iso().required(),
-      discount: Joi.number().required(),
+      discount: Joi.number().allow(null),
       status: Joi.number().required(),
-      paymentmethod: Joi.number().required(),
-      totalprice: Joi.number().required(),
+      paymentmethod: Joi.number().allow(null),
+      totalprice: Joi.number().allow(null),
       branchid: Joi.number().required(),
-      customername: Joi.string().required(),
-      tableNumber: Joi.number().required(),
+      customername: Joi.string().allow('', null), // Allowing empty string and null
+      tableNumber: Joi.number().allow(null),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {

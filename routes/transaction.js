@@ -6,83 +6,87 @@
  *        type: object
  *        required:
  *          - transactiondate
- *          - discount
- *          - status
- *          - paymentmethod
- *          - totalprice
  *          - branchid
- *          - customername
- *          - tablenumber
+ *          - status
  *        properties:
  *          transactiondate:
- *            type: date
+ *            type: string
+ *            format: date-time
  *            description: Date of the transaction
  *          discount:
  *            type: number
  *            description: Total discount
+ *            nullable: true
  *          status:
  *            type: number
  *            description: Transaction status, 0 means success, 1 means pending
  *          paymentmethod:
  *            type: number
  *            description: Payment Method of the transaction, 0 means cash, 1 means transfer
+ *            nullable: true
  *          totalprice:
  *            type: number
  *            description: Total transaction price
+ *            nullable: true
  *          branchid:
  *            type: number
- *            description: id of the Branch
+ *            description: ID of the Branch
  *          customername:
  *            type: string
- *            description: name of the customer
- *          tableNumber:
+ *            description: Name of the customer
+ *            nullable: true
+ *          tablenumber:
  *            type: number
- *            description: number of the table
+ *            description: Number of the table
+ *            nullable: true
  *        example:
- *          id: 4
- *          transactiondate: 2024-03-15T14:30:00
+ *          transactiondate: "2024-03-15T14:30:00Z"
  *          discount: 10
- *          status: 1
- *          paymentmethod: 2
+ *          status: 0
+ *          paymentmethod: 1
  *          totalprice: 50000
- *          branchid: 12
- *          customername: Alice Johnson
- *          tableNumber: 5
+ *          branchid: 1
+ *          customername: "Alice Johnson"
+ *          tablenumber: 5
  *      updateTransaction:
  *        type: object
+ *          - id
  *          - transactiondate
- *          - discount
- *          - status
- *          - paymentmethod
- *          - totalprice
  *          - branchid
- *          - customername
- *          - tablenumber
  *        properties:
+ *          id:
+ *            type: number
+ *            description: id of the transaction
  *          transactiondate:
- *            type: date
+ *            type: string
+ *            format: date-time
  *            description: Date of the transaction
  *          discount:
  *            type: number
  *            description: Total discount
+ *            nullable: true
  *          status:
  *            type: number
  *            description: Transaction status, 0 means success, 1 means pending
  *          paymentmethod:
  *            type: number
  *            description: Payment Method of the transaction, 0 means cash, 1 means transfer
+ *            nullable: true
  *          totalprice:
  *            type: number
  *            description: Total transaction price
+ *            nullable: true
  *          branchid:
  *            type: number
- *            description: id of the Branch
+ *            description: ID of the Branch
  *          customername:
  *            type: string
- *            description: name of the customer
- *          tableNumber:
+ *            description: Name of the customer
+ *            nullable: true
+ *          tablenumber:
  *            type: number
- *            description: number of the table
+ *            description: Number of the table
+ *            nullable: true
  *        example:
  *          transactiondate: 2024-03-15T14:30:00
  *          discount: 10
@@ -337,6 +341,7 @@ router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransa
  *          content:
  *            application/x-www-form-urlencoded:
  *              schema:
+ * 
  *                $ref: '#/components/schemas/updateTransaction'
  *        responses:
  *          200:
