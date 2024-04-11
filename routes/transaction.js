@@ -50,9 +50,11 @@
  *          tablenumber: 5
  *      updateTransaction:
  *        type: object
+ *        required:
  *          - id
  *          - transactiondate
  *          - branchid
+ *          - status
  *        properties:
  *          id:
  *            type: number
