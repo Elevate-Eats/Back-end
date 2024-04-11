@@ -28,6 +28,7 @@ exports.addTransaction = async (req, res) => {
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
+      console.log(error);
       return res.status(204).json({
         error: true,
         message: 'Validation error',

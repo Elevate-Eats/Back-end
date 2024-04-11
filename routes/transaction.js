@@ -35,7 +35,7 @@
  *            type: string
  *            description: Name of the customer
  *            nullable: true
- *          tablenumber:
+ *          tableNumber:
  *            type: number
  *            description: Number of the table
  *            nullable: true
@@ -47,7 +47,7 @@
  *          totalprice: 50000
  *          branchid: 1
  *          customername: "Alice Johnson"
- *          tablenumber: 5
+ *          tableNumber: 5
  *      updateTransaction:
  *        type: object
  *        required:
@@ -85,7 +85,7 @@
  *            type: string
  *            description: Name of the customer
  *            nullable: true
- *          tablenumber:
+ *          tableNumber:
  *            type: number
  *            description: Number of the table
  *            nullable: true
@@ -255,7 +255,7 @@ router.post('/showSingleTransaction', isLoggedIn, transactionController.showSing
  *        requestBody:
  *          required: true
  *          content:
- *            application/x-www-form-urlencoded:
+ *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/addTransaction'
  *        responses:
@@ -341,7 +341,7 @@ router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransa
  *        requestBody:
  *          required: true
  *          content:
- *            application/x-www-form-urlencoded:
+ *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/updateTransaction'
  *        responses:
