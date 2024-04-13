@@ -40,7 +40,8 @@ exports.recordTransaction = async (req, res) => {
 exports.showDailySummary = async (req, res) => {
   try {
     const schema = Joi.object({
-      branchId: Joi.number().min(1).required(),
+      companyId: Joi.number(),
+      branchId: Joi.number(),
       startDate: Joi.date(),
       endDate: Joi.date(),
     });
@@ -52,24 +53,30 @@ exports.showDailySummary = async (req, res) => {
         details: error.details.map((x) => x.message),
       });
     }
-    const { branchId, startDate, endDate } = value;
-    let results;
-    if (branchId && startDate && endDate) {
-      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate]);
-    } else if (branchId && startDate && !endDate) {
-      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date >= $2 ORDER BY date ASC', [branchId, startDate]);
-    } else if (branchId && !startDate && endDate) {
-      // Only branchId and endDate are provided
-      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 AND date <= $2 ORDER BY date ASC', [branchId, endDate]);
-    } else if (branchId && !startDate && !endDate) {
-      // Only branchId is provided
-      results = await db.query('SELECT * FROM dailyanalytics WHERE branchId = $1 ORDER BY date ASC', [branchId]);
-    } else {
-      return res.status(400).json({
-        error: true,
-        message: 'Missing or incorrect query parameters.',
-      });
+    const {
+      companyId, branchId, startDate, endDate,
+    } = value;
+    let conditions = 'WHERE companyid = $1';
+    // eslint-disable-next-line prefer-const
+    let parameters = [companyId];
+    let count = 2; // for param query
+    if (branchId) {
+      conditions += ` AND branchId = $${count}`;
+      parameters.push(branchId);
+      count += 1;
     }
+    if (startDate) {
+      conditions += ` AND date >= $${count}`;
+      parameters.push(startDate);
+      count += 1;
+    }
+    if (endDate) {
+      conditions += ` AND date <= $${count}`;
+      parameters.push(endDate);
+      count += 1;
+    }
+    const query = `SELECT * FROM dailyitemanalytics ${conditions} ORDER BY date ASC`;
+    const results = await db.query(query, parameters);
     const data = results.rows.map((dailyAnalytics) => {
       const {
         id,
@@ -105,7 +112,8 @@ exports.showDailySummary = async (req, res) => {
 exports.showItemsSummary = async (req, res) => {
   try {
     const schema = Joi.object({
-      branchId: Joi.number().min(1).required(),
+      companyId: Joi.number().min(1).required(),
+      branchId: Joi.number(),
       startDate: Joi.date(),
       endDate: Joi.date(),
       menuId: Joi.number().min(1).required(),
@@ -119,27 +127,36 @@ exports.showItemsSummary = async (req, res) => {
       });
     }
     const {
-      branchId, startDate, endDate, menuId,
+      companyId, branchId, startDate, endDate, menuId,
     } = value;
-    let results;
-    if (branchId && startDate && endDate && menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date >= $2 AND date <= $3 ORDER BY date ASC', [branchId, startDate, endDate, menuId]);
-    } else if (branchId && startDate && !endDate && menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date >= $2 ORDER BY date ASC', [branchId, startDate, menuId]);
-    } else if (branchId && !startDate && endDate && menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $4 AND date <= $2 ORDER BY date ASC', [branchId, endDate, menuId]);
-    } else if (branchId && !startDate && !endDate && menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 AND menuId = $2 ORDER BY date ASC', [branchId, menuId]);
-    } else if (!branchId && menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE menuId = $1 ORDER BY date ASC', [menuId]);
-    } else if (branchId && !startDate && !endDate && !menuId) {
-      results = await db.query('SELECT * FROM dailyitemanalytics WHERE branchId = $1 ORDER BY date ASC', [branchId]);
-    } else {
-      return res.status(400).json({
-        error: true,
-        message: 'Missing or incorrect query parameters.',
-      });
+    let conditions = 'WHERE companyid = $1';
+    // eslint-disable-next-line prefer-const
+    let parameters = [companyId];
+    let count = 2; //  param query
+
+    if (branchId) {
+      conditions += ` AND branchId = $${count}`;
+      parameters.push(branchId);
+      count += 1;
     }
+    if (menuId) {
+      conditions += ` AND menuId = $${count}`;
+      parameters.push(menuId);
+      count += 1;
+    }
+    if (startDate) {
+      conditions += ` AND date >= $${count}`;
+      parameters.push(startDate);
+      count += 1;
+    }
+    if (endDate) {
+      conditions += ` AND date <= $${count}`;
+      parameters.push(endDate);
+      count += 1;
+    }
+
+    const query = `SELECT * FROM dailyitemanalytics ${conditions} ORDER BY date ASC`;
+    const results = await db.query(query, parameters);
     const data = results.rows.map((dailyAnalytics) => {
       const {
         id,
