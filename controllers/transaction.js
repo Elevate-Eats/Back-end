@@ -207,7 +207,7 @@ exports.showSingleTransaction = async (req, res) => {
       totalprice,
       branchid,
       customername,
-      tableNumber,
+      tablenumber,
     } = result.rows[0];
     const transactionData = {
       transactiondate,
@@ -217,7 +217,7 @@ exports.showSingleTransaction = async (req, res) => {
       totalprice,
       branchid,
       customername,
-      tableNumber,
+      tablenumber,
     };
     return res.status(200).json({
       error: false,
