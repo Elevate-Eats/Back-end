@@ -75,8 +75,12 @@ const router = express.Router();
  *          - bearerAuth: []
  *        parameters:
  *          - in: query
- *            name: branchId
+ *            name: companyId
  *            required: true
+ *            schema:
+ *              type: integer
+ *          - in: query
+ *            name: branchId
  *            schema:
  *              type: integer
  *          - in: query
@@ -123,8 +127,12 @@ router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary
  *          - bearerAuth: []
  *        parameters:
  *          - in: query
- *            name: branchId
+ *            name: companyId
  *            required: true
+ *            schema:
+ *              type: integer
+ *          - in: query
+ *            name: branchId
  *            schema:
  *              type: integer
  *          - in: query
