@@ -75,7 +75,7 @@ exports.showDailySummary = async (req, res) => {
       parameters.push(endDate);
       count += 1;
     }
-    const query = `SELECT * FROM dailyitemanalytics ${conditions} ORDER BY date ASC`;
+    const query = `SELECT * FROM dailyanalytics ${conditions} ORDER BY date ASC`;
     const results = await db.query(query, parameters);
     const data = results.rows.map((dailyAnalytics) => {
       const {

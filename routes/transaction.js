@@ -90,6 +90,7 @@
  *            description: Number of the table
  *            nullable: true
  *        example:
+ *          id: 1
  *          transactiondate: 2024-03-15T14:30:00
  *          discount: 10
  *          status: 1
