@@ -18,10 +18,12 @@ exports.up = function (knex) {
     table.index('branchid');
     table.index('transactiondate');
     // Define foreign key constraints
-    table.foreign('branchid').references('id').inTable('branches').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
-    table.foreign('companyid').references('id').inTable('companies').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
+    table.foreign('branchid').references('id').inTable('branches')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table.foreign('companyid').references('id').inTable('companies')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
   });
 };
 

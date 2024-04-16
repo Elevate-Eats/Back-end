@@ -13,8 +13,9 @@ exports.up = function (knex) {
     table.integer('companyid').unsigned();
 
     // Set up the foreign key constraint
-    table.foreign('companyid').references('id').inTable('companies').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
+    table.foreign('companyid').references('id').inTable('companies')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
   });
 };
 

@@ -19,10 +19,12 @@ exports.up = function (knex) {
     table.primary(['menuid', 'branchid']);
 
     // Foreign Key Constraints
-    table.foreign('branchid').references('id').inTable('branches').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
-    table.foreign('menuid').references('id').inTable('menus').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
+    table.foreign('branchid').references('id').inTable('branches')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table.foreign('menuid').references('id').inTable('menus')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
   });
 };
 

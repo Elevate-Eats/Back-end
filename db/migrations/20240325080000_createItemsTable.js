@@ -16,10 +16,12 @@ exports.up = function (knex) {
     table.index('transactionid');
     table.index(['transactionid', 'menuid'], 'idx_items_on_transaction_menu');
     // Foreign key constraints
-    table.foreign('menuid').references('id').inTable('menus').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
-    table.foreign('transactionid').references('id').inTable('transactions').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
+    table.foreign('menuid').references('id').inTable('menus')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table.foreign('transactionid').references('id').inTable('transactions')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
   });
 };
 

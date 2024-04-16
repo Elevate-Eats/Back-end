@@ -14,9 +14,9 @@ exports.up = function (knex) {
     table.integer('managerid').unsigned();
 
     // Foreign key constraints
-    table.foreign('companyid').references('id').inTable('companies').onUpdate('NO ACTION')
-      .onDelete('NO ACTION');
-
+    table.foreign('companyid').references('id').inTable('companies')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
     // Assuming managerid is a foreign key, you would similarly set up a foreign key constraint
     // table.foreign('managerid').references('id').inTable('managers')
     // .onUpdate('NO ACTION').onDelete('NO ACTION');
