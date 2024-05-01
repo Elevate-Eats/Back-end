@@ -77,6 +77,7 @@ exports.login = async (req, res) => {
         token,
         nickname,
         id,
+        companyid,
       });
     });
   } catch (err) {
