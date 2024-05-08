@@ -175,7 +175,7 @@ const router = express.Router();
  *  paths:
  *    /branch/v1/showBranches:
  *      get:
- *        summary: Show Data Branches
+ *        summary: Show Data of All Branches
  *        tags:
  *          - Branch
  *        security:
@@ -185,30 +185,57 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Search Parameter of Branches
+ *            description: Search Parameter for Branches
+ *          - in: query
+ *            name: limit
+ *            schema:
+ *              type: integer
+ *            description: Limit for Number of Branches to Retrieve
  *        responses:
  *          200:
- *            description: Success
+ *            description: List of branches retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/showBranches'
  *                example:
  *                  error: false
- *                  message: Branch data retrieved successfully
+ *                  message: "Branch Data Fetch: Succeed"
  *                  branchData:
- *                    id: 10
- *                    name: "Jogjakarta"
- *                    address: "Jl. Godean, Godean, Yogyakarta, DIY"
- *          404:
- *            description: Retrieval Failed
+ *                    - id: 10
+ *                      name: "Jogjakarta"
+ *                      address: "Jl. Godean, Godean, Yogyakarta, DIY"
+ *                    - id: 11
+ *                      name: "Jakarta"
+ *                      address: "Jl. Thamrin, Jakarta Pusat"
+ *          400:
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/showBranches'
  *                example:
  *                  error: true
- *                  message: Branch not found
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
+ *          404:
+ *            description: No branches found
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/showBranches'
+ *                example:
+ *                  error: true
+ *                  message: "Branch Data Fetch: No Data Found"
+ *          500:
+ *            description: Server error during branch data retrieval
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/showBranches'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Show Branch"
  */
 router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
 
@@ -225,33 +252,41 @@ router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showDelSingleBranch'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showDelSingleBranch'
  *        responses:
  *          200:
- *            description: Success
+ *            description: Branch data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/showSingleBranch'
  *                example:
  *                  error: false
- *                  message: Branch data retrieved successfully
- *                  branchData:
- *                    id: 10
- *                    name: "Jogjakarta"
- *                    phone: "+6281122445566"
- *                    address: "Jl. Godean, Godean, Yogyakarta, DIY"
+ *                  message: "Branch data Fetch: Succeed"
+ *                  branchData: {...}
  *          404:
- *            description: Retrieval Failed
+ *            description: Branch not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/showSingleBranch'
  *                example:
  *                  error: true
- *                  message: Branch not found
+ *                  message: "Branch not found"
+ *          500:
+ *            description: Server error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/showSingleBranch'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Show Single Branch"
  */
 router.post('/showSingleBranch', isLoggedIn, branchController.showSingleBranch);
 
@@ -268,38 +303,41 @@ router.post('/showSingleBranch', isLoggedIn, branchController.showSingleBranch);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/addBranch'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/addBranch'
  *        responses:
  *          200:
- *            description: Success
+ *            description: Branch added successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/addBranch'
  *                example:
  *                  error: false
- *                  message: Branch added
+ *                  message: "Create Branch: Succeed"
  *          400:
- *            description: Validation Failed
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/addBranch'
  *                example:
  *                  error: true
- *                  message: Validation error
- *                  details: 'API Detailed Message'
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
  *          500:
- *            description: Validation Failed
+ *            description: Server error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/addBranch'
  *                example:
  *                  error: true
- *                  message: Failed to Add Branch
+ *                  message: "Server Error: Create Branch"
  */
 router.post('/addBranch', isLoggedIn, branchController.createBranch);
 
@@ -316,28 +354,40 @@ router.post('/addBranch', isLoggedIn, branchController.createBranch);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showDelSingleBranch'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showDelSingleBranch'
  *        responses:
  *          200:
- *            description: Success
+ *            description: Branch deleted successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/deleteBranch'
  *                example:
  *                  error: false
- *                  message: Branch deleted
+ *                  message: "Delete Branch: Succeed"
+ *          400:
+ *            description: Cannot delete - Branch has active employees
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/deleteBranch'
+ *                example:
+ *                  error: true
+ *                  message: "Delete Branch: Failed - Branch has active employees"
  *          500:
- *            description: Failed
+ *            description: Server error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/deleteBranch'
  *                example:
- *                  error: false
- *                  message: failed to delete branch
+ *                  error: true
+ *                  message: "Server Error: Delete Branch"
  */
 router.post('/deleteBranch', isLoggedIn, branchController.deleteBranch);
 
@@ -354,28 +404,41 @@ router.post('/deleteBranch', isLoggedIn, branchController.deleteBranch);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/updateBranch'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/updateBranch'
  *        responses:
  *          200:
- *            description: Success
+ *            description: Branch updated successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/updateBranch'
  *                example:
  *                  error: false
- *                  message: Branch updated
+ *                  message: "Update Branch: Succeed"
+ *          400:
+ *            description: Validation error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/updateBranch'
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
  *          500:
- *            description: Failed
+ *            description: Server error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/updateBranch'
  *                example:
- *                  error: false
- *                  message: failed to update branch
+ *                  error: true
+ *                  message: "Server Error: Update Branch"
  */
 router.post('/updateBranch', isLoggedIn, branchController.updateBranch);
 

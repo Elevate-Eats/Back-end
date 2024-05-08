@@ -1,211 +1,221 @@
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
-const { Pool } = require('pg');
+// Required Func Helper
+const { selectBranches } = require('../db/func/branch/selectBranch');
+const { selectSingleBranch } = require('../db/func/branch/selectSingleBranch');
+const { insertBranch } = require('../db/func/branch/insertBranch');
+const { deleteBranch } = require('../db/func/branch/deleteBranch');
+const { checkIfBranchDeletable } = require('../db/func/branch/deleteBranch');
+const { updateBranch } = require('../db/func/branch/updateBranch');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
-
+// Branch Controller for Showing All Branch
 exports.showAllBranch = async (req, res) => {
   try {
+    // Decode Company Id from JWT
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-    const { search, limit } = req.query;
-    db.query('SELECT * FROM branches WHERE companyId = $1', [companyid], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch branch data' });
-      }
+    const { companyid } = decoded;
 
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'Branch not found' });
-      }
-      let branchData = results.rows.map((branch) => {
-        const {
-          id, name, address,
-        } = branch;
-        return {
-          id, name, address,
-        };
+    // Validation
+    const schema = Joi.object({
+      search: Joi.string().optional(),
+      limit: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
-      if (search) {
-        branchData = branchData.filter((branch) => branch.name.toLowerCase().startsWith(
-          search.toLowerCase(),
-        ));
-      }
-      if (limit) {
-        branchData = branchData.slice(0, Number(limit));
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Branch data retrieved successfully',
-        branchData,
+    }
+    const { search, limit } = value;
+
+    // Fetching Data on DB function
+    const branchData = await selectBranches(companyid, search, limit);
+    // If no branch was found
+    if (branchData.length === 0) {
+      return res.status(404).json({
+        error: true,
+        message: 'Branch Data Fetch: No Data Found',
       });
+    }
+    // Response if Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Branch Data Fetch: Succeed',
+      branchData,
     });
   } catch (err) {
-    console.log('showBranch Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve branch data' });
+    // IF There's Any Error on Server
+    console.error('Show Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Branch',
+    });
   }
-  return console.log('showSingleBranch controller executed');
 };
 
+// Branch Controller for Showing Single Branch
 exports.showSingleBranch = async (req, res) => {
   try {
-    const { id } = req.body;
-    db.query('SELECT * FROM branches WHERE id = $1', [id], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch branch data' });
-      }
-
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'Branch not found' });
-      }
-
-      const {
-        name, phone, address, managerId,
-      } = results.rows[0];
-      const branchData = {
-        id, name, phone, address, managerId,
-      };
-
-      return res.status(200).json({
-        error: false,
-        message: 'Branch data retrieved successfully',
-        branchData,
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
+    }
+    const { id } = value;
+
+    // Data Fetch using DB Function Helper
+    const branchData = await selectSingleBranch(id);
+    // Response if Not found
+    if (!branchData) {
+      return res.status(404).json({
+        error: true,
+        message: 'Branch not found',
+      });
+    }
+    // If Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Branch data Fetch: Succeed',
+      branchData,
     });
   } catch (err) {
-    console.log('showBranch Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve branch data' });
+    // IF There's Any Error on Server
+    console.error('Show Single Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Single Branch',
+    });
   }
-  return console.log('showSingleBranch controller executed');
 };
 
+// Branch Controller for Creating a Branch
 exports.createBranch = async (req, res) => {
   try {
+    // Decoding Company id from token
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded; // Corrected companyId extraction
+    const { companyid } = decoded;
+    // Validation
     const schema = Joi.object({
       name: Joi.string().min(1).required(),
       phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
       address: Joi.string().required(),
-      managerId: Joi.number(),
+      managerId: Joi.optional(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
-
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      name, phone, address, managerId,
-    } = value;
-    db.query('INSERT INTO branches (name, phone, address, managerId,companyId) VALUES ($1,$2,$3,$4,$5)', [name, phone, address, managerId, companyid], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'failed to add branch',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Branch added',
-      });
-    });
-  } catch (err) {
-    console.log('addBranch Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed addBranch' });
-  }
-  return console.log('createBranch controller executed');
-};
 
-exports.deleteBranch = async (req, res) => {
-  try {
-    const { id } = req.body;
-    db.query('SELECT * FROM employees WHERE branchid = $1', [id], (err, results) => {
-      if (err) {
-        return res.status(500).json({
-          error: true,
-          message: 'Check Employees Error',
-        });
-      }
-      if (results.rows.length > 0) {
-        return res.status(400).json({
-          error: true,
-          message: 'Branch has Employees, please remove the employees',
-        });
-      }
-      db.query('DELETE FROM branches WHERE id = $1 ', [id], (error) => {
-        if (error) {
-          console.log(error);
-          return res.status(500).json({
-            error: true,
-            message: 'failed to delete branch',
-          });
-        }
-        return res.status(200).json({
-          error: false,
-          message: 'Branch deleted',
-        });
-      });
-      return console.log('deleteBranch controller executed');
-    });
-  } catch (err) {
-    console.log('deleteEmployee Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed deleteBranch' });
-  }
-  return console.log('deleteBranch controller executed');
-};
-
-exports.updateBranch = async (req, res) => {
-  const schema = Joi.object({
-    id: Joi.number().required(),
-    name: Joi.string().min(1).required(),
-    phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
-    address: Joi.string().required(),
-    managerId: Joi.number(),
-  });
-  const { error, value } = schema.validate(req.body, { abortEarly: false });
-  if (error) {
-    return res.status(400).json({
-      error: true,
-      message: 'Validation error',
-      details: error.details.map((x) => x.message),
-    });
-  }
-  const {
-    id, name, phone, address, managerId,
-  } = value;
-  db.query('UPDATE branches SET name = $2, phone = $3, address = $4, managerId = $5 WHERE id=$1', [id, name, phone, address, managerId], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
-        error: true,
-        message: 'failed to update branch',
-      });
-    }
+    // Inserting Data
+    await insertBranch({ ...value, companyid });
+    // If Succeed
     return res.status(200).json({
       error: false,
-      message: 'Branch updated',
+      message: 'Create Branch: Succeed',
     });
-  });
-  return console.log('updateBranch controller executed');
+  } catch (err) {
+    // If Failed
+    console.error('Create Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Create Branch',
+    });
+  }
+};
+
+// BranchController for deleting a Branch
+exports.deleteBranch = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { id } = value;
+    // Check Employee
+    const canDelete = await checkIfBranchDeletable(id);
+    // If There's Employee
+    if (canDelete) {
+      return res.status(400).json({
+        error: true,
+        message: 'Delete Branch: Failed - Branch has active employees',
+      });
+    }
+    // Deletion on DB
+    await deleteBranch(id);
+    // If Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Delete Branch: Succeed',
+    });
+  } catch (err) {
+    // If Error
+    console.error('Delete Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Delete Branch',
+    });
+  }
+};
+
+// BranchController for updating Branch
+exports.updateBranch = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+      name: Joi.string().min(1).required(),
+      phone: Joi.string().pattern(/^\+62\d{9,12}$/).required(),
+      address: Joi.string().required(),
+      managerId: Joi.number().optional(),
+    });
+
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Updating on DB
+    await updateBranch(value);
+    // If Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Update Branch: Succeed',
+    });
+  } catch (err) {
+    // If Error
+    console.error('Update Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Branch',
+    });
+  }
 };
