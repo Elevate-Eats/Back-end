@@ -107,50 +107,46 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Find Employee Data base of Keyword
+ *            description: Keyword to search employees
  *          - in: query
  *            name: limit
  *            schema:
  *              type: integer
- *            description: Show limited Number of Employees
+ *            description: Limit the number of employees returned
  *          - in: query
  *            name: unassigned
  *            schema:
  *              type: integer
- *            description: Find Employee that is Unassigned to Branch
+ *            description: 1 to find employees unassigned to any branch
  *        responses:
  *          200:
- *            description: Employee Found
+ *            description: Employee data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: employee data retrieved successfully
- *                  employeeData:
- *                    - id: 1
- *                      name: "Santoso"
- *                      salary: 500
- *                      bonus: 100
+ *                  message: "Employee Data Fetch: Succeed"
+ *                  employeeData: [...]
  *          404:
- *            description: Employee not Found
+ *            description: No employees found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: employee not found
+ *                  message: "Employee Data Fetch: No Data Found"
  *          500:
- *            description: Failed to Fetch Employee
+ *            description: Server error fetching employees
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to fetch employee data
+ *                  message: "Server Error: Show All Employees"
  */
 router.get('/showEmployees', isLoggedIn, employeeController.showAllEmployee);
 
@@ -167,42 +163,41 @@ router.get('/showEmployees', isLoggedIn, employeeController.showAllEmployee);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelEmployee'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelEmployee'
  *        responses:
  *          200:
- *            description: A single employee object
+ *            description: A single employee retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: employee data retrieved successfully
- *                  employeeData:
- *                    id: 10
- *                    name: John Doe
- *                    salary: 100000
- *                    bonus: 8000
+ *                  message: "Employee Data Fetch: Succeed"
+ *                  employeeData: {...}
  *          404:
- *            description: Employee not Found
+ *            description: Employee not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: employee not found
+ *                  message: "Employee not found"
  *          500:
- *            description: Fetch Data Failed
+ *            description: Server error fetching employee data
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to fetch employee data
+ *                  message: "Server Error: Show Single Employee"
  */
 router.post('/showSingleEmployee', isLoggedIn, employeeController.showSingleEmployee);
 
@@ -219,6 +214,9 @@ router.post('/showSingleEmployee', isLoggedIn, employeeController.showSingleEmpl
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/addEmployee'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/addEmployee'
@@ -231,26 +229,25 @@ router.post('/showSingleEmployee', isLoggedIn, employeeController.showSingleEmpl
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Employee added
+ *                  message: "Create Employee: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Bad Request: Validation"
  *          500:
- *            description: Employee add Failed
+ *            description: Server error adding employee
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to add Employee
+ *                  message: "Server Error: Create Employee"
  */
 router.post('/addEmployee', isLoggedIn, employeeController.createEmployee);
 
@@ -267,6 +264,9 @@ router.post('/addEmployee', isLoggedIn, employeeController.createEmployee);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelEmployee'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelEmployee'
@@ -279,16 +279,16 @@ router.post('/addEmployee', isLoggedIn, employeeController.createEmployee);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Employee deleted
+ *                  message: "Delete Employee: Succeed"
  *          500:
- *            description: Employee deletion failed
+ *            description: Server error deleting employee
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to delete Employee
+ *                  message: "Server Error: Delete Employee"
  */
 router.post('/deleteEmployee', isLoggedIn, employeeController.deleteEmployee);
 
@@ -305,6 +305,9 @@ router.post('/deleteEmployee', isLoggedIn, employeeController.deleteEmployee);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/updateEmployee'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/updateEmployee'
@@ -317,16 +320,16 @@ router.post('/deleteEmployee', isLoggedIn, employeeController.deleteEmployee);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Employee updated
+ *                  message: "Update Employee: Succeed"
  *          500:
- *            description: Employee update failed
+ *            description: Server error updating employee
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to update Employee
+ *                  message: "Server Error: Update Employee"
  */
 router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
 
@@ -335,7 +338,7 @@ router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
  *  paths:
  *    /employee/v1/updateEmployeesBranch:
  *      post:
- *        summary: Updates employee's Branch
+ *        summary: Updates the branch assignment for multiple employees
  *        tags:
  *          - Employee
  *        security:
@@ -346,25 +349,28 @@ router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/updateEmployeesBranch'
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/updateEmployeesBranch'
  *        responses:
  *          200:
- *            description: Employees Branch Id Updated successfully
+ *            description: Employees' branch updated successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Employees Branch Id Updated
+ *                  message: "Update Employees Branch ID: Succeed"
  *          500:
- *            description: Employee update failed
+ *            description: Server error updating employees' branches
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed Update EmployeeBranch
+ *                  message: "Server Error: Update Employees Branch"
  */
 router.post('/updateEmployeesBranch', isLoggedIn, employeeController.updateEmployeesBranch);
 module.exports = router;

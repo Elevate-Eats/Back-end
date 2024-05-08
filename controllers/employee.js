@@ -1,226 +1,244 @@
+// Required Module
 const Joi = require('joi');
-const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// Required Function Helper
+const { selectEmployees } = require('../db/func/employee/selectEmployees');
+const { selectSingleEmployee } = require('../db/func/employee/selectSingleEmployee');
+const { insertEmployee } = require('../db/func/employee/insertEmployee');
+const { deleteEmployee } = require('../db/func/employee/deleteEmployee');
+const { updateEmployeeBranch } = require('../db/func/employee/updateEmployee');
+const { updateEmployee } = require('../db/func/employee/updateEmployee');
 
+// Controller for show Employees
 exports.showAllEmployee = async (req, res) => {
   try {
+    // Decode CompanyId
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
-    const { search, limit, unassigned } = req.query;
-    db.query('SELECT * FROM employees WHERE companyId = $1', [companyid], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch employee data' });
-      }
+    const { companyid } = decoded;
 
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'employee not found' });
-      }
-      let employeeData = results.rows.map((employee) => {
-        const {
-          id, name, salary, bonus, branchid,
-        } = employee;
-        return {
-          id, name, salary, bonus, branchid,
-        };
+    // Validation
+    const schema = Joi.object({
+      search: Joi.string().optional(),
+      limit: Joi.number().optional(),
+      unassigned: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
-      if (search) {
-        employeeData = employeeData.filter((employee) => employee.name.toLowerCase().startsWith(
-          search.toLowerCase(),
-        ));
-      }
-      if (unassigned) {
-        employeeData = employeeData.filter((employee) => employee.branchid === null);
-      }
-      if (limit) {
-        employeeData = employeeData.slice(0, Number(limit));
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'employee data retrieved successfully',
-        employeeData,
+    }
+    // Fetch Data
+    const { search, limit, unassigned } = value;
+    const employeeData = await selectEmployees(companyid, search, limit, unassigned);
+    // If Not Found
+    if (employeeData.length === 0) {
+      return res.status(404).json({
+        error: true,
+        message: 'Employee Data Fetch: No Data Found',
       });
+    }
+    // If Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Employee Data Fetch: Succeed',
+      employeeData,
     });
   } catch (err) {
-    console.log('showEmployee Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve employee data' });
+    // Server Error
+    console.error('Show All Employees Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show All Employees',
+    });
   }
-  return console.log('showEmployee controller executed');
 };
 
+// Controller for Show One Employee
+exports.showSingleEmployee = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { id } = value;
+    const employeeData = await selectSingleEmployee(id);
+    // Employee not found
+    if (!employeeData) {
+      return res.status(404).json({
+        error: true,
+        message: 'Employee not found',
+      });
+    }
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Employee Data Fetch: Succeed',
+      employeeData,
+    });
+  } catch (err) {
+    // Server Err
+    console.error('Show Single Employee Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Single Employee',
+    });
+  }
+};
+
+// Insert Employee Controller
 exports.createEmployee = async (req, res) => {
   try {
+    // Decoding Company ID
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
-    const { companyid } = decoded; // Assuming companyId is directly available in the decoded object
+    const { companyid } = decoded;
+    // Validation
     const schema = Joi.object({
       name: Joi.string().min(1).required(),
       salary: Joi.number().required(),
       bonus: Joi.number().required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
-
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      name, salary, bonus,
-    } = value;
-    db.query('INSERT INTO employees (name, salary, bonus, companyId) VALUES ($1,$2,$3,$4)', [name, salary, bonus, companyid], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'failed to add Employee',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Employee added',
-      });
-    });
-  } catch (err) {
-    console.log('addEmployee Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed addEmployee' });
-  }
-  return console.log('createEmployee controller executed');
-};
-
-exports.showSingleEmployee = (req, res) => {
-  try {
-    const { id } = req.body;
-    db.query('SELECT * FROM employees WHERE id = $1', [id], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch employee data' });
-      }
-
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'employee not found' });
-      }
-
-      const {
-        name, salary, bonus, EmployeeId,
-      } = results.rows[0];
-      const employeeData = {
-        id, name, salary, bonus, EmployeeId,
-      };
-
-      return res.status(200).json({
-        error: false,
-        message: 'employee data retrieved successfully',
-        employeeData,
-      });
-    });
-  } catch (err) {
-    console.log('showSingleEmployee Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve Employee data' });
-  }
-  return console.log('showSingleEmployee controller executed');
-};
-
-exports.updateEmployee = async (req, res) => {
-  const schema = Joi.object({
-    id: Joi.number().required(),
-    name: Joi.string().min(1).required(),
-    salary: Joi.number().required(),
-    bonus: Joi.number().required(),
-    branchId: Joi.number(),
-  });
-  const { error, value } = schema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    return res.status(400).json({
-      error: true,
-      message: 'Validation error',
-      details: error.details.map((x) => x.message),
-    });
-  }
-  const {
-    id, name, salary, bonus, branchId,
-  } = value;
-  db.query('UPDATE employees SET name = $2, salary = $3, bonus = $4, branchId= $5 WHERE id=$1', [id, name, salary, bonus, branchId], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
-        error: true,
-        message: 'failed to update Employee',
-      });
-    }
+    // Insert to DB
+    await insertEmployee({ ...value, companyid });
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Employee updated',
+      message: 'Create Employee: Succeed',
     });
-  });
-  return console.log('updateEmployee controller executed');
+  } catch (err) {
+    // Server Error
+    console.error('Create Employee Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Create Employee',
+    });
+  }
 };
 
+// Controller for Updating Employee
+exports.updateEmployee = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+      name: Joi.string().min(1).required(),
+      salary: Joi.number().required(),
+      bonus: Joi.number().required(),
+      branchId: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Update DB
+    await updateEmployee(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Update Employee: Succeed',
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Update Employee Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Employee',
+    });
+  }
+};
+
+// Controller for Update Employee (branch only)
 exports.updateEmployeesBranch = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       employeeIds: Joi.array().items(Joi.number().required()).required(),
       branchId: Joi.number().min(1).allow(null), // Allow 'null' for unassigning the employee
     });
-    const { error, value } = schema.validate(req.body, ({ abortEarly: false }));
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
     const { employeeIds, branchId } = value;
-    const updatePromises = employeeIds.map((employeeId) => db.query('UPDATE employees SET branchid = $2 WHERE id = $1', [employeeId, branchId]));
-    await Promise.all(updatePromises);
+
+    // Update DB
+    await updateEmployeeBranch(employeeIds, branchId);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Employees Branch Id Updated',
+      message: 'Update Employees Branch ID: Succeed',
     });
   } catch (err) {
-    console.log('employeeBranchUpdate Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed Update EmployeeBranch' });
+    // Server Error
+    console.error('Update Employees Branch Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Employees Branch',
+    });
   }
 };
 
+// Controller for deleting Employee
 exports.deleteEmployee = async (req, res) => {
   try {
-    const { id } = req.body;
-    db.query('DELETE FROM employees WHERE id = $1 ', [id], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'failed to delete Employee',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Employee deleted',
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
+    }
+
+    const { id } = value;
+    // Deleting Employee in DB
+    await deleteEmployee(id);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Delete Employee: Succeed',
     });
   } catch (err) {
-    console.log('deleteEmployee Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed addBranch' });
+    // Server Error
+    console.error('Delete Employee Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Delete Employee',
+    });
   }
-  return console.log('deleteEmployee controller executed');
 };
