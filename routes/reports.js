@@ -27,7 +27,7 @@ const router = express.Router();
  *             type: string
  *             format: date-time
  *           required: true
- *           description: The date of the report in YYYY-MM-DDTHH:MM:SS.sssZ format
+ *           description: The date of the report in YYYY-MM-DD
  *       responses:
  *         200:
  *           description: Daily report fetched successfully
