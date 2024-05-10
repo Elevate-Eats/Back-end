@@ -6,63 +6,46 @@
  *        type: object
  *        required:
  *          - count
- *          - menuid
- *          - pricingcategory
- *          - transactionid
+ *          - menuId
+ *          - pricingCategory
+ *          - transactionId
  *          - price
  *          - totalPrice
  *          - category
  *        properties:
  *          count:
  *            type: number
- *            description: The quantity of items
- *          menuid:
+ *            description: The quantity of the item
+ *            minimum: 1
+ *          menuId:
  *            type: number
- *            description: The unique identifier for the menu item
- *          pricingcategory:
+ *            description: The identifier for the menu item
+ *            minimum: 1
+ *          pricingCategory:
  *            type: string
- *            description: The pricing category for the item
- *          transactionid:
+ *            description: Category for pricing, dictates which price to apply
+ *          transactionId:
  *            type: number
- *            description: The unique identifier of the transaction
+ *            description: The transaction identifier that this item belongs to
+ *            minimum: 1
  *          price:
  *            type: number
- *            description: Price of the Item
+ *            description: Price per unit of the item
+ *            minimum: 1
  *          totalPrice:
  *            type: number
- *            description: Total price of the item with the count
+ *            description: Total price for the item (count * price)
+ *            minimum: 1
  *          category:
  *            type: string
- *            description: category of the item
- *        example:
- *          count: 2
- *          menuid: 4
- *          pricingcategory: 'base'
- *          transactionid: 1
- *          price: 50000
- *          totalprice: 100000
- *          category: Makanan
- *      updateItems:
- *        type: object
- *        required:
- *          - id
- *          - count
- *          - pricingcategory
- *        properties:
- *          id:
- *            type: integer
- *            description: Employee ID
- *          count:
- *            type: number
- *            description: Count of the item
- *          pricingcategory:
- *            type: string
- *            description: category of the pricing
- *        example:
- *          id: 10
- *          count: 3
- *          pricingcategory: online
- *      showSingleDelItem:
+ *            description: Category of the item, e.g., appetizer, main course, dessert
+ *      ItemsArray:
+ *        type: array
+ *        items:
+ *          $ref: '#/components/schemas/Item'
+ *        minItems: 1
+ *        description: An array of items to be added, each with detailed specifications.
+ *      ShowSingleDelItem:
  *        type: object
  *        required:
  *          - id
@@ -88,6 +71,8 @@
  *          - id
  *          - count
  *          - pricingcategory
+ *          - price
+ *          - totalPrice
  *        properties:
  *          id:
  *            type: number
@@ -110,6 +95,12 @@
  *          pricingcategory: 'base'
  *          price: 20000
  *          totalPrice: 80000
+ *      UpdateItems:
+ *        type: array
+ *        items:
+ *          $ref: '#/components/schemas/UpdateItem'
+ *        minItems: 1
+ *        description: An array of items to be updated, each with detailed specifications.
  */
 
 /**
@@ -129,7 +120,7 @@ const router = express.Router();
  *  paths:
  *    /item/v1/showItems:
  *      get:
- *        summary: Returns a list of Items
+ *        summary: Returns a list of items linked to a transaction
  *        tags:
  *          - Item
  *        security:
@@ -138,46 +129,52 @@ const router = express.Router();
  *          - in: query
  *            name: transactionId
  *            schema:
- *              type: string
- *            description: Find items data based on transaction id
+ *              type: integer
+ *            description: Transaction ID to fetch items for
  *        responses:
  *          200:
- *            description: Item Found
+ *            description: Items data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: item data retrieved successfully
- *                  itemData:
- *                    - id: 1
- *                      count: 3
- *                      price: 5000
- *                      totalprice: 15000
- *                      menuid: 3
- *                      transactionId: 4
- *                      category: Menu Utama
- *                      pricingcategory: base
+ *                  message: "Item Data Fetch: Succeed"
+ *                  itemData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Item not Found
+ *            description: No items found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Item not found
+ *                  message: "Item Data Fetch: No Data Found"
  *          500:
- *            description: Failed to Fetch Item
+ *            description: Server error fetching items
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to fetch Item data
+ *                  message: "Server Error: Show All Items"
  */
+
 router.get('/showItems', isLoggedIn, itemsController.showItems);
 
 /**
@@ -185,7 +182,7 @@ router.get('/showItems', isLoggedIn, itemsController.showItems);
  *  paths:
  *    /item/v1/addItems:
  *      post:
- *        summary: Adds an array of items
+ *        summary: Adds new items to a transaction
  *        tags:
  *          - Item
  *        security:
@@ -195,71 +192,71 @@ router.get('/showItems', isLoggedIn, itemsController.showItems);
  *          content:
  *            application/json:
  *              schema:
- *                type: array
- *                items:
- *                  $ref: '#/components/schemas/Item'
- *              examples:
- *                arrayExample:
- *                  summary: An array of items
- *                  value:
- *                    - count: 2
- *                      menuId: 1
- *                      pricingCategory: 'base'
- *                      transactionId: 1
- *                      price: 20000
- *                      totalPrice: 40000
- *                      category: Makanan
- *                    - count: 3
- *                      menuId: 3
- *                      pricingCategory: 'online'
- *                      transactionId: 2
- *                      price: 10000
- *                      totalPrice: 30000
- *                      category: Makanan
+ *                $ref: '#/components/schemas/ItemsArray'
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/ItemsArray'
  *        responses:
  *          200:
- *            description: Item added successfully
+ *            description: Items added successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Item added
+ *                  message: "Create Items: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Bad Request: Validation"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Item add Failed
+ *            description: Server error adding items
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to add Employee
+ *                  message: "Server Error: Add Items"
  */
 router.post('/addItems', isLoggedIn, itemsController.addItems);
 
 /**
- * @swagger
+ *  @swagger
  *  paths:
- *    /items/v1/deleteItems:
+ *    /item/v1/deleteItems:
  *      post:
- *        summary: Delete multiple items
+ *        summary: Deletes specified items
  *        tags:
  *          - Item
+ *        security:
+ *          - bearerAuth: []
  *        requestBody:
  *          required: true
  *          content:
  *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/DeleteItems'
+ *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/DeleteItems'
  *        responses:
@@ -268,39 +265,21 @@ router.post('/addItems', isLoggedIn, itemsController.addItems);
  *            content:
  *              application/json:
  *                schema:
- *                  type: object
- *                  properties:
- *                    error:
- *                      type: boolean
- *                      example: false
- *                    message:
- *                      type: string
- *                      example: 'Items deleted successfully'
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: false
+ *                  message: "Delete Items: Succeed"
  *          400:
  *            description: Validation error
- *          500:
- *            description: Server error
- */
-router.post('/deleteItems', isLoggedIn, itemsController.deleteItems);
-
-/**
- * @swagger
- *    /items/v1/updateItems:
- *      post:
- *        summary: Update multiple items
- *        tags:
- *          - Item
- *        requestBody:
- *          required: true
- *          content:
- *            application/json:
- *              schema:
- *                type: array
- *                items:
- *                  $ref: '#/components/schemas/UpdateItem'
- *        responses:
- *          200:
- *            description: Items updated successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation Error"
+ *          401:
+ *            description: Unauthorized due to Token Problem
  *            content:
  *              application/json:
  *                schema:
@@ -308,14 +287,82 @@ router.post('/deleteItems', isLoggedIn, itemsController.deleteItems);
  *                  properties:
  *                    error:
  *                      type: boolean
- *                      example: false
+ *                      example: true
  *                    message:
  *                      type: string
- *                      example: 'Items updated successfully'
+ *                      example: "Unauthorized: Token expired"
+ *          500:
+ *            description: Server error deleting items
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Delete Items"
+ */
+router.post('/deleteItems', isLoggedIn, itemsController.deleteItems);
+
+/**
+ *  @swagger
+ *  paths:
+ *    /item/v1/updateItems:
+ *      post:
+ *        summary: Updates specified items
+ *        tags:
+ *          - Item
+ *        security:
+ *          - bearerAuth: []
+ *        requestBody:
+ *          required: true
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/UpdateItems'
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/UpdateItems'
+ *        responses:
+ *          200:
+ *            description: Items updated successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: false
+ *                  message: "Items Updated Successfully"
  *          400:
  *            description: Validation error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Server error
+ *            description: Server error updating items
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Update Items"
  */
 router.post('/updateItems', isLoggedIn, itemsController.updateItems);
 module.exports = router;
