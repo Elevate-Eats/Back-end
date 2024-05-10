@@ -31,7 +31,9 @@
  *            type: number
  *            description: Base Online Price of The Menu
  *        example:
- *          name: Sate
+ *          menuId: 1
+ *          branchId: 1
+ *          name: Sate Kambing
  *          category: Menu Utama
  *          basePrice: 57000
  *          baseOnlinePrice: 60000
@@ -118,7 +120,7 @@ const router = express.Router();
  *  paths:
  *    /menuBranch/v1/showMenus:
  *      get:
- *        summary: Returns a list of menus
+ *        summary: Returns a list of menus within a specific branch
  *        tags:
  *          - menuBranch
  *        security:
@@ -128,52 +130,59 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Find Menu Data base of Keyword
+ *            description: Keyword to search within menu names
  *          - in: query
  *            name: limit
  *            schema:
  *              type: integer
- *            description: Show limited Number of Menus
+ *            description: Maximum number of menus to return
  *          - in: query
  *            name: branchid
  *            schema:
  *              type: integer
- *            description: Id of the branch
+ *            description: ID of the branch to filter menus
  *        responses:
  *          200:
- *            description: Menu Found
+ *            description: Successfully retrieved list of menus
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: menuData retrieved successfully
- *                  MenuData:
- *                    - menuid : 4,
- *                      branchid : 12,
- *                      name: Sate Tegal 10 Tusuk Campur,
- *                      category: Menu Utama,
- *                      baseprice: 56000,
- *                      baseonlineprice: 60000
+ *                  message: "Menu data retrieved successfully"
+ *                  MenuData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Menu not Found
+ *            description: No menus found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Menu not found
+ *                  message: "No menus found"
  *          500:
- *            description: Failed to Fetch Menu
+ *            description: Server error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to show Menus, Server Error
+ *                  message: "Failed to fetch menus"
  */
 router.get('/showMenus', isLoggedIn, menuBranchController.showMenus);
 
@@ -182,7 +191,7 @@ router.get('/showMenus', isLoggedIn, menuBranchController.showMenus);
  *  paths:
  *    /menuBranch/v1/showSingleMenu:
  *      post:
- *        summary: Returns a single menu by ID
+ *        summary: Returns a single menu by ID within a specific branch
  *        tags:
  *          - menuBranch
  *        security:
@@ -190,54 +199,54 @@ router.get('/showMenus', isLoggedIn, menuBranchController.showMenus);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelMenuB'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelMenuB'
  *        responses:
  *          200:
- *            description: A single menu object
+ *            description: Successfully retrieved menu details
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: MenuData retrieved successfully
- *                  menuData:
- *                    - menuid : 4,
- *                      branchid : 12,
- *                      name: Sate Tegal 10 Tusuk Campur,
- *                      category: Menu Utama,
- *                      baseprice: 56000,
- *                      baseonlineprice: 60000
- *          400:
- *            description: Validation Error
+ *                  message: "Menu data retrieved successfully"
+ *                  menuData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
  *            content:
  *              application/json:
  *                schema:
- *                  $ref: '#/components/definitions-response/regularResponse'
- *                example:
- *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Menu not Found
+ *            description: Menu not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Menu not found
+ *                  message: "Menu not found"
  *          500:
- *            description: Fetch Data Failed
+ *            description: Server error fetching menu data
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to show Menu, Server Error
+ *                  message: "Failed to fetch menu data"
  */
 router.post('/showSingleMenu', isLoggedIn, menuBranchController.showSingleMenu);
 
@@ -246,7 +255,7 @@ router.post('/showSingleMenu', isLoggedIn, menuBranchController.showSingleMenu);
  *  paths:
  *    /menuBranch/v1/addMenu:
  *      post:
- *        summary: Adds a new Menu
+ *        summary: Adds a new menu to a specific branch
  *        tags:
  *          - menuBranch
  *        security:
@@ -254,6 +263,9 @@ router.post('/showSingleMenu', isLoggedIn, menuBranchController.showSingleMenu);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/addMenuB'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/addMenuB'
@@ -266,26 +278,38 @@ router.post('/showSingleMenu', isLoggedIn, menuBranchController.showSingleMenu);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu added succesfully
+ *                  message: "Menu added successfully"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Validation error"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu add Failed
+ *            description: Server error adding menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to addMenu, Server Error
+ *                  message: "Failed to add menu"
  */
 router.post('/addMenu', isLoggedIn, menuBranchController.addMenu);
 
@@ -294,7 +318,7 @@ router.post('/addMenu', isLoggedIn, menuBranchController.addMenu);
  *  paths:
  *    /menuBranch/v1/updateMenu:
  *      post:
- *        summary: Updates an existing menu
+ *        summary: Updates an existing menu within a branch
  *        tags:
  *          - menuBranch
  *        security:
@@ -302,6 +326,9 @@ router.post('/addMenu', isLoggedIn, menuBranchController.addMenu);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/updateMenuB'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/updateMenuB'
@@ -314,26 +341,29 @@ router.post('/addMenu', isLoggedIn, menuBranchController.addMenu);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu updated!
- *          400:
- *            description: Validation Error
+ *                  message: "Menu updated successfully"
+ *          401:
+ *            description: Unauthorized due to Token Problem
  *            content:
  *              application/json:
  *                schema:
- *                  $ref: '#/components/definitions-response/regularResponse'
- *                example:
- *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu update failed
+ *            description: Server error updating menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to update Menu, Server Error
+ *                  message: "Failed to update menu"
  */
 router.post('/updateMenu', isLoggedIn, menuBranchController.updateMenu);
 
@@ -342,7 +372,7 @@ router.post('/updateMenu', isLoggedIn, menuBranchController.updateMenu);
  *  paths:
  *    /menuBranch/v1/deleteMenu:
  *      post:
- *        summary: Deletes a menu by ID
+ *        summary: Deletes a menu from a specific branch
  *        tags:
  *          - menuBranch
  *        security:
@@ -350,6 +380,9 @@ router.post('/updateMenu', isLoggedIn, menuBranchController.updateMenu);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelMenuB'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelMenuB'
@@ -362,26 +395,29 @@ router.post('/updateMenu', isLoggedIn, menuBranchController.updateMenu);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu Deleted!
- *          400:
- *            description: Validation Error
+ *                  message: "Menu deleted successfully"
+ *          401:
+ *            description: Unauthorized due to Token Problem
  *            content:
  *              application/json:
  *                schema:
- *                  $ref: '#/components/definitions-response/regularResponse'
- *                example:
- *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu deletion failed
+ *            description: Server error deleting menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to delete Menu, Server Error
+ *                  message: "Failed to delete menu"
  */
-router.post('/deleteMenu', isLoggedIn, menuBranchController.deleteMenus);
+router.post('/deleteMenu', isLoggedIn, menuBranchController.deleteMenu);
 module.exports = router;

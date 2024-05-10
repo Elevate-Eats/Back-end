@@ -10,6 +10,7 @@ exports.seed = (knex) => knex('menubranch').del()
   .then((menus) => {
     const menubranchInserts = menus.map((menu) => ({
       menuid: menu.id,
+      name: menu.name,
       branchid: 1,
       baseprice: menu.baseprice,
       baseonlineprice: menu.baseonlineprice,
