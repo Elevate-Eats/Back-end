@@ -1,7 +1,6 @@
 exports.getDailyReport = async (req, res) => {
   const { branchId, date } = req.query;
 
-  // Format date to include time set to midnight in UTC
   const formattedDate = new Date(date).toISOString();
 
   const apiKey = process.env.API_KEY;
