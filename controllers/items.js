@@ -1,16 +1,15 @@
 const Joi = require('joi');
-const { Pool } = require('pg');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// Import function helpers
+const { selectItems } = require('../db/func/item/selectItems');
+const { insertItems } = require('../db/func/item/insertItems');
+const { updateItems } = require('../db/func/item/updateItems');
+const { deleteItems } = require('../db/func/item/deleteItems');
 
+// Show All Items for a Transaction
 exports.showItems = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       transactionId: Joi.number().min(1).required(),
     });
@@ -18,35 +17,41 @@ exports.showItems = async (req, res) => {
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
     const { transactionId } = value;
-    const results = await db.query('SELECT * FROM items WHERE transactionid = $1', [transactionId]);
-    const itemData = results.rows.map((item) => {
-      const {
-        id, count, price, totalprice, menuid, category, pricingcategory,
-      } = item;
-      return {
-        id, count, price, totalprice, menuid, transactionId, category, pricingcategory,
-      };
-    });
+    // Read from DB
+    const itemData = await selectItems(transactionId);
+    // Not Found
+    if (itemData.length === 0) {
+      return res.status(404).json({
+        error: true,
+        message: 'Item Data Fetch: No Data Found',
+      });
+    }
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'itemData Retrieved!',
+      message: 'Item Data Fetch: Succeed',
       itemData,
     });
   } catch (err) {
-    console.log('showItems Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to show Items, Server Error' });
+    // Server Error
+    console.error('Show All Items Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show All Items',
+    });
   }
 };
+
+// Add New Items
 exports.addItems = async (req, res) => {
   try {
-    console.log(req.body);
-    const itemSchema = Joi.object({
+    // Validation
+    const schema = Joi.array().items(Joi.object({
       count: Joi.number().min(1).required(),
       menuId: Joi.number().min(1).required(),
       pricingCategory: Joi.string().required(),
@@ -54,93 +59,98 @@ exports.addItems = async (req, res) => {
       price: Joi.number().min(1).required(),
       totalPrice: Joi.number().min(1).required(),
       category: Joi.string().required(),
-    });
-    const schema = Joi.array().items(itemSchema).min(1).required();
+    })).min(1).required();
+
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const insertPromises = value.map(({
-      count, menuId, pricingCategory, transactionId, price, totalPrice, category,
-    }) => db.query(
-      'INSERT INTO items (count, menuid, pricingcategory, transactionid, price, totalprice, category) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-      [count, menuId, pricingCategory, transactionId, price, totalPrice, category],
-    ));
-    await Promise.all(insertPromises);
+    // Insert to DB
+    await insertItems(value);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Items Added successfully',
+      message: 'Create Item: Succeed',
     });
   } catch (err) {
-    console.log('addItems Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to add Items, Server Error' });
+    // Server Error
+    console.error('Add Items Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Add Items',
+    });
   }
 };
 
+// Delete Items
 exports.deleteItems = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
-      itemIds: Joi.array().items(Joi.number()),
+      itemIds: Joi.array().items(Joi.number()).required(),
     });
+    console.log('schema', req.body);
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const { itemIds } = value;
-    const deletePromises = itemIds.map((id) => db.query('DELETE FROM items WHERE id = $1', [id]));
-    await Promise.all(deletePromises);
+    // Delete on DB
+    await deleteItems(value.itemIds);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Items Added successfully',
+      message: 'Delete Item: Succeed',
     });
   } catch (err) {
-    console.log('addItems Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to add Items, Server Error' });
+    console.error('Delete Items Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Delete Items',
+    });
   }
 };
 
+// Update Items
 exports.updateItems = async (req, res) => {
   try {
-    const itemSchema = Joi.object({
+    // Validation
+    const schema = Joi.array().items(Joi.object({
       id: Joi.number().min(1).required(),
       count: Joi.number().min(1).required(),
       pricingcategory: Joi.string().required(),
       price: Joi.number().min(1).required(),
       totalPrice: Joi.number().min(1).required(),
-    });
-    const schema = Joi.array().items(itemSchema).min(1).required();
+    })).min(1).required();
+
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const updatePromises = value.map(({
-      id, count, pricingcategory, price, totalPrice,
-    }) => db.query(
-      'UPDATE items SET count = $2, pricingcategory = $3, price = $4, totalprice = $5 WHERE id = $1',
-      [id, count, pricingcategory, price, totalPrice],
-    ));
-    await Promise.all(updatePromises);
+    // Update on DB
+    await updateItems(value);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Items Updated successfully',
+      message: 'Update Items: Succeed',
     });
   } catch (err) {
-    console.log('updateItems Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to update Items, Server Error' });
+    // Server Error
+    console.error('Update Items Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Items',
+    });
   }
 };
