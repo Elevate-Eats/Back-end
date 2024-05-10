@@ -1,16 +1,14 @@
 const Joi = require('joi');
-const { Pool } = require('pg');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// Helper Function
+const { insertCompleteTransaction } = require('../db/func/analytics/insertCompleteTransaction');
+const { selectDailyAnalytics } = require('../db/func/analytics/selectDailyAnalytics');
+const { selectDailyItemAnalytics } = require('../db/func/analytics/selectDailyItemAnalytics');
 
+// Controller for Recording Transactions
 exports.recordTransaction = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       transactionId: Joi.number().min(1).required(),
     });
@@ -18,29 +16,33 @@ exports.recordTransaction = async (req, res) => {
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      transactionId,
-    } = value;
-    await db.query('INSERT INTO completetransactions (transactionid) VALUES ($1)', [transactionId]);
+    // Insert to DB
+    await insertCompleteTransaction(value.transactionId);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'Transaction Recorded successfully',
+      message: 'Transaction Recorded: Succeed',
     });
   } catch (err) {
-    console.log('recordTransaction Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to record Transaction, Server Error' });
+    // Server Error
+    console.error('Record Transaction Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Record Transaction',
+    });
   }
 };
 
+// Controller for Showing Daily Summary
 exports.showDailySummary = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
-      companyId: Joi.number(),
+      companyId: Joi.number().required(),
       branchId: Joi.number(),
       startDate: Joi.date(),
       endDate: Joi.date(),
@@ -49,142 +51,61 @@ exports.showDailySummary = async (req, res) => {
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      companyId, branchId, startDate, endDate,
-    } = value;
-    let conditions = 'WHERE companyid = $1';
-    // eslint-disable-next-line prefer-const
-    let parameters = [companyId];
-    let count = 2; // for param query
-    if (branchId) {
-      conditions += ` AND branchId = $${count}`;
-      parameters.push(branchId);
-      count += 1;
-    }
-    if (startDate) {
-      conditions += ` AND date >= $${count}`;
-      parameters.push(startDate);
-      count += 1;
-    }
-    if (endDate) {
-      conditions += ` AND date <= $${count}`;
-      parameters.push(endDate);
-      count += 1;
-    }
-    const query = `SELECT * FROM dailyanalytics ${conditions} ORDER BY date ASC`;
-    const results = await db.query(query, parameters);
-    const data = results.rows.map((dailyAnalytics) => {
-      const {
-        id,
-        date,
-        companyid,
-        branchid,
-        totalsales,
-        numberoftransactions,
-        numberofitemssold,
-      } = dailyAnalytics;
-      return {
-        id,
-        date,
-        companyid,
-        branchid,
-        totalsales,
-        numberoftransactions,
-        numberofitemssold,
-      };
-    });
+    // Read from DB
+    const data = await selectDailyAnalytics(value);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'DailyAnalytics data fetched',
+      message: 'Daily Analytics Data Fetched: Succeed',
       data,
     });
   } catch (err) {
-    console.log('showDailyAnalytics Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to showDailyAnalytics, Server Error' });
+    // Server Error
+    console.error('Show Daily Summary Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Daily Summary',
+    });
   }
 };
 
+// Controller for Showing Items Summary
 exports.showItemsSummary = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
-      companyId: Joi.number().min(1).required(),
-      branchId: Joi.number(),
-      startDate: Joi.date(),
-      endDate: Joi.date(),
-      menuId: Joi.number().min(1).required(),
+      companyId: Joi.number().required(),
+      branchId: Joi.number().optional(),
+      startDate: Joi.date().optional(),
+      endDate: Joi.date().optional(),
+      menuId: Joi.number().optional(),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      companyId, branchId, startDate, endDate, menuId,
-    } = value;
-    let conditions = 'WHERE companyid = $1';
-    // eslint-disable-next-line prefer-const
-    let parameters = [companyId];
-    let count = 2; //  param query
-
-    if (branchId) {
-      conditions += ` AND branchId = $${count}`;
-      parameters.push(branchId);
-      count += 1;
-    }
-    if (menuId) {
-      conditions += ` AND menuId = $${count}`;
-      parameters.push(menuId);
-      count += 1;
-    }
-    if (startDate) {
-      conditions += ` AND date >= $${count}`;
-      parameters.push(startDate);
-      count += 1;
-    }
-    if (endDate) {
-      conditions += ` AND date <= $${count}`;
-      parameters.push(endDate);
-      count += 1;
-    }
-
-    const query = `SELECT * FROM dailyitemanalytics ${conditions} ORDER BY date ASC`;
-    const results = await db.query(query, parameters);
-    const data = results.rows.map((dailyAnalytics) => {
-      const {
-        id,
-        date,
-        companyid,
-        branchid,
-        menuid,
-        numberofitemssold,
-        totalsales,
-      } = dailyAnalytics;
-      return {
-        id,
-        date,
-        companyid,
-        branchid,
-        menuid,
-        numberofitemssold,
-        totalsales,
-      };
-    });
+    // Read From DB
+    const data = await selectDailyItemAnalytics(value);
+    // Succeed
     return res.status(200).json({
       error: false,
-      message: 'DailyItemsAnalytics data fetched',
+      message: 'Daily Items Analytics Data Fetched: Succeed',
       data,
     });
   } catch (err) {
-    console.log('showDailyAnalytics Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to showDailyAnalytics, Server Error' });
+    // Server Error
+    console.error('Show Items Summary Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Items Summary',
+    });
   }
 };

@@ -57,6 +57,7 @@
  *          numberofitemssold: 15
  *          totalsales: 30000.00
  */
+
 const express = require('express');
 const { isLoggedIn } = require('../controllers/auth.js');
 const analyticsController = require('../controllers/analytics.js');
@@ -76,7 +77,6 @@ const router = express.Router();
  *        parameters:
  *          - in: query
  *            name: companyId
- *            required: true
  *            schema:
  *              type: integer
  *          - in: query
@@ -99,20 +99,39 @@ const router = express.Router();
  *            content:
  *              application/json:
  *                schema:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/DailySummaryData'
+ *          400:
+ *            description: Validation Error
+ *            content:
+ *              application/json:
+ *                schema:
  *                  type: object
  *                  properties:
  *                    error:
  *                      type: boolean
+ *                      example: true
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
  *                    message:
  *                      type: string
- *                    data:
- *                      type: array
- *                      items:
- *                        $ref: '#/components/schemas/DailySummaryData'
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  */
-
 router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary);
 
 /**
@@ -128,7 +147,6 @@ router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary
  *        parameters:
  *          - in: query
  *            name: companyId
- *            required: true
  *            schema:
  *              type: integer
  *          - in: query
@@ -145,9 +163,21 @@ router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary
  *            schema:
  *              type: string
  *              format: date
+ *          - in: query
+ *            name: menuId
+ *            schema:
+ *              type: integer
  *        responses:
  *          200:
  *            description: Daily items analytics data fetched successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/DailyItemsAnalyticsData'
+ *          400:
+ *            description: Validation Error
  *            content:
  *              application/json:
  *                schema:
@@ -155,12 +185,24 @@ router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary
  *                  properties:
  *                    error:
  *                      type: boolean
+ *                      example: true
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
  *                    message:
  *                      type: string
- *                    data:
- *                      type: array
- *                      items:
- *                        $ref: '#/components/schemas/DailyItemsAnalyticsData'
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  */
@@ -179,6 +221,15 @@ router.get('/showItemsSummary', isLoggedIn, analyticsController.showItemsSummary
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                required:
+ *                  - transactionId
+ *                properties:
+ *                  transactionId:
+ *                    type: integer
+ *                    description: The ID of the transaction to record
  *            application/x-www-form-urlencoded:
  *              schema:
  *                type: object
@@ -198,11 +249,37 @@ router.get('/showItemsSummary', isLoggedIn, analyticsController.showItemsSummary
  *                  properties:
  *                    error:
  *                      type: boolean
+ *                      example: false
  *                    message:
  *                      type: string
+ *                      example: "Transaction Recorded: Succeed"
+ *          400:
+ *            description: Validation Error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
  *                example:
- *                  error: false
- *                  message: transaction recorded
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  */

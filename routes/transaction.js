@@ -132,59 +132,64 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Find Transaction Data base of Keyword
+ *            description: Keyword to search transactions
  *          - in: query
  *            name: limit
  *            schema:
  *              type: integer
- *            description: Show limited Number of Transaction
+ *            description: Limit the number of transactions returned
  *          - in: query
  *            name: branch
  *            schema:
  *              type: integer
- *            description: Show transactions in a branch (id)
+ *            description: Filter transactions by branch ID
  *          - in: query
  *            name: status
  *            schema:
  *              type: integer
- *            description: Show transactions based on status (0,1)
+ *            description: Filter transactions based on status (0 for success, 1 for pending)
  *        responses:
  *          200:
- *            description: Transaction Found
+ *            description: Transactions found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: transaction data retrieved successfully
- *                  transactionData:
- *                    - id: 1
- *                      transactiondate: "2024-03-15T07:30:00.000Z"
- *                      discount: 10
- *                      status: 1
- *                      paymentmethod: 2
- *                      totalprice: 500
- *                      branchid: 12
- *                      customername: "Alice Johnson"
+ *                  message: "Transaction Data Fetch: Succeed"
+ *                  transactionData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: transaction not Found
+ *            description: No transactions found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: transaction not found
+ *                  message: "Transaction Data Fetch: No Transactions Found"
  *          500:
- *            description: Failed to Fetch transaction
+ *            description: Failed to fetch transactions
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to retrieve transaction data
+ *                  message: "Server Error: Show Transactions"
  */
 router.get('/showTransactions', isLoggedIn, transactionController.showTransactions);
 
@@ -201,45 +206,54 @@ router.get('/showTransactions', isLoggedIn, transactionController.showTransactio
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelTransaction'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelTransaction'
  *        responses:
  *          200:
- *            description: A single transaction object
+ *            description: A single transaction retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Transaction data retrieved successfully
- *                  transactionData:
- *                    - transactiondate: "2024-03-15T07:30:00.000Z"
- *                      discount: 10
- *                      status: 1
- *                      paymentmethod: 2
- *                      totalprice: 500
- *                      branchid: 12
- *                      customername: "Alice Johnson"
+ *                  message: "Transaction Data Fetch: Succeed"
+ *                  transactionData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Transaction not Found
+ *            description: Transaction not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: transaction not found
+ *                  message: "Transaction Data Fetch: Not Found"
  *          500:
- *            description: Fetch Data Failed
+ *            description: Server error fetching transaction data
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to retrieve Transaction data
+ *                  message: "Server Error: Show Single Transaction"
  */
 router.post('/showSingleTransaction', isLoggedIn, transactionController.showSingleTransaction);
 
@@ -259,6 +273,9 @@ router.post('/showSingleTransaction', isLoggedIn, transactionController.showSing
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/addTransaction'
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/addTransaction'
  *        responses:
  *          200:
  *            description: Transaction added successfully
@@ -268,26 +285,39 @@ router.post('/showSingleTransaction', isLoggedIn, transactionController.showSing
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Transaction added
+ *                  message: "Create Transaction: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Bad Request: Validation"
+ *                  details: ["Error message from API"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Transaction add Failed
+ *            description: Transaction add failed
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to add Transaction
+ *                  message: "Server Error: Add Transaction"
  */
 router.post('/addTransaction', isLoggedIn, transactionController.addTransaction);
 
@@ -296,7 +326,7 @@ router.post('/addTransaction', isLoggedIn, transactionController.addTransaction)
  *  paths:
  *    /transaction/v1/deleteTransaction:
  *      post:
- *        summary: Deletes a Transacton by ID
+ *        summary: Deletes a Transaction by ID
  *        tags:
  *          - Transaction
  *        security:
@@ -304,6 +334,9 @@ router.post('/addTransaction', isLoggedIn, transactionController.addTransaction)
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelTransaction'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelTransaction'
@@ -316,7 +349,20 @@ router.post('/addTransaction', isLoggedIn, transactionController.addTransaction)
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Transaction deleted
+ *                  message: "Delete Transaction: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Transaction deletion failed
  *            content:
@@ -325,7 +371,7 @@ router.post('/addTransaction', isLoggedIn, transactionController.addTransaction)
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed delete Transaction
+ *                  message: "Server Error: Delete Transaction"
  */
 router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransaction);
 
@@ -345,6 +391,9 @@ router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransa
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/updateTransaction'
+ *            application/x-www-form-urlencoded:
+ *              schema:
+ *                $ref: '#/components/schemas/updateTransaction'
  *        responses:
  *          200:
  *            description: Transaction updated successfully
@@ -354,26 +403,39 @@ router.post('/deleteTransaction', isLoggedIn, transactionController.deleteTransa
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Transaction updated
+ *                  message: "Update Transaction: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Bad Request: Validation"
+ *                  details: ["Error message from API"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Transaction update Failed
+ *            description: Transaction update failed
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to update Transaction
+ *                  message: "Server Error: Update Transaction"
  */
 router.post('/updateTransaction', isLoggedIn, transactionController.updateTransaction);
 
