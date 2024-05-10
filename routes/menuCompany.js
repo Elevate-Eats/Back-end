@@ -52,6 +52,7 @@
  *            type: number
  *            description: Base Online Price of The Menu
  *        example:
+ *          id: 1
  *          name: Sate
  *          category: Menu Utama
  *          basePrice: 57000
@@ -94,44 +95,54 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Find Menu Data base of Keyword
+ *            description: Keyword to search menus
  *          - in: query
  *            name: limit
  *            schema:
  *              type: integer
- *            description: Show limited Number of Menus
+ *            description: Limit the number of menus returned
  *        responses:
  *          200:
- *            description: Menu Found
+ *            description: Menus data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: menuData retrieved successfully
- *                  MenuData:
- *                    - id: 1
- *                      name: "Sate"
- *                      category: "Menu Utama"
+ *                  message: "Menu Data Fetch: Succeed"
+ *                  menuData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Menu not Found
+ *            description: No menus found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Menu not found
+ *                  message: "Menu Data Fetch: No Data Found"
  *          500:
- *            description: Failed to Fetch Menu
+ *            description: Server error fetching menus
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to show Menus, Server Error
+ *                  message: "Server Error: Show Menus"
  */
 router.get('/showMenus', isLoggedIn, menuCompanyController.showMenus);
 
@@ -148,42 +159,54 @@ router.get('/showMenus', isLoggedIn, menuCompanyController.showMenus);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelMenu'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelMenu'
  *        responses:
  *          200:
- *            description: A single menu object
+ *            description: Menu data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: MenuData retrieved successfully
- *                  menuData:
- *                    name: Sate
- *                    category: Menu Utama
- *                    basePrice: 57000
- *                    baseOnlinePrice: 60000
+ *                  message: "Menu Data Fetch: Succeed"
+ *                  menuData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Menu not Found
+ *            description: Menu not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Menu not found
+ *                  message: "Menu not found"
  *          500:
- *            description: Fetch Data Failed
+ *            description: Server error fetching menu data
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to show Menu, Server Error
+ *                  message: "Server Error: Show Single Menu"
  */
 router.post('/showSingleMenu', isLoggedIn, menuCompanyController.showSingleMenu);
 
@@ -192,7 +215,7 @@ router.post('/showSingleMenu', isLoggedIn, menuCompanyController.showSingleMenu)
  *  paths:
  *    /menuCompany/v1/addMenu:
  *      post:
- *        summary: Adds a new Menu
+ *        summary: Adds a new menu
  *        tags:
  *          - menuCompany
  *        security:
@@ -200,6 +223,9 @@ router.post('/showSingleMenu', isLoggedIn, menuCompanyController.showSingleMenu)
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/addMenu'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/addMenu'
@@ -212,26 +238,38 @@ router.post('/showSingleMenu', isLoggedIn, menuCompanyController.showSingleMenu)
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu added succesfully
+ *                  message: "Create Menu: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
+ *                  message: "Bad Request: Validation"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu add Failed
+ *            description: Server error adding menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to addMenu, Server Error
+ *                  message: "Server Error: Create Menu"
  */
 router.post('/addMenu', isLoggedIn, menuCompanyController.addMenu);
 
@@ -248,6 +286,9 @@ router.post('/addMenu', isLoggedIn, menuCompanyController.addMenu);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/updateMenu'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/updateMenu'
@@ -260,16 +301,29 @@ router.post('/addMenu', isLoggedIn, menuCompanyController.addMenu);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu updated!
+ *                  message: "Update Menu: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu update failed
+ *            description: Server error updating menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to update Menu, Server Error
+ *                  message: "Server Error: Update Menu"
  */
 router.post('/updateMenu', isLoggedIn, menuCompanyController.updateMenu);
 
@@ -286,6 +340,9 @@ router.post('/updateMenu', isLoggedIn, menuCompanyController.updateMenu);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelMenu'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelMenu'
@@ -298,16 +355,29 @@ router.post('/updateMenu', isLoggedIn, menuCompanyController.updateMenu);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Menu Deleted!
+ *                  message: "Delete Menu: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Menu deletion failed
+ *            description: Server error deleting menu
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to delete Menu, Server Error
+ *                  message: "Server Error: Delete Menu"
  */
 router.post('/deleteMenu', isLoggedIn, menuCompanyController.deleteMenus);
 module.exports = router;

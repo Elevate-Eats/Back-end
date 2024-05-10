@@ -1,158 +1,145 @@
-const jwt = require('jsonwebtoken');
 const Joi = require('joi');
-const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// Function helpers for menu operations
+const { selectMenus } = require('../db/func/menuCompany/selectMenus');
+const { selectSingleMenu } = require('../db/func/menuCompany/selectSingleMenu');
+const { insertMenu } = require('../db/func/menuCompany/insertMenu');
+const { updateMenu } = require('../db/func/menuCompany/updateMenu');
+const { deleteMenu } = require('../db/func/menuCompany/deleteMenu');
 
+// Controller to add a new menu
 exports.addMenu = async (req, res) => {
   try {
+    // Decoding CompanyId
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded;
+
+    // Validation
     const schema = Joi.object({
       name: Joi.string().min(1).required(),
       category: Joi.string().min(1).required(),
       basePrice: Joi.number().required(),
       baseOnlinePrice: Joi.number().required(),
     });
+
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      name, category, basePrice, baseOnlinePrice,
-    } = value;
-    db.query('INSERT INTO menus (name, category, basePrice, baseOnlinePrice, companyId) VALUES ($1, $2, $3, $4, $5)', [name, category, basePrice, baseOnlinePrice, companyid], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'Failed to addMenu, DB Error',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Menu Added successfully',
-      });
+    // Insert to DB
+    await insertMenu({ ...value, companyid });
+    return res.status(200).json({
+      error: false,
+      message: 'Create Menu: Succeed',
     });
   } catch (err) {
-    console.log('addProduct Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to add Product, Server Error' });
+    // Server Error
+    console.error('Create Menu Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Create Menu',
+    });
   }
-  return console.log('addMenu Executed');
 };
 
+// Controller to show all menus
 exports.showMenus = async (req, res) => {
   try {
+    // Decode companyId
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded;
-    const { search, limit } = req.query;
-    db.query('SELECT * FROM menus WHERE companyid = $1', [companyid], (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'Failed to showMenu',
-        });
-      }
-      let menuData = result.rows.map((menu) => {
-        const {
-          id, name, category,
-        } = menu;
-        return {
-          id, name, category,
-        };
+    // Validation
+    const schema = Joi.object({
+      search: Joi.string().optional(),
+      limit: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
-      if (search) {
-        menuData = menuData.filter((menu) => menu.name.toLowerCase().startsWith(
-          search.toLowerCase(),
-        ));
-      }
-      if (limit) {
-        menuData = menuData.slice(0, Number(limit));
-      }
-      if (menuData.length === 0) {
-        return res.status(404).json({
-          error: true,
-          message: 'Menu not found',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'menuData retrieved successfully',
-        menuData,
+    }
+    const { search, limit } = value;
+    // Read on DB
+    const menuData = await selectMenus(companyid, search, limit);
+    // Not Found
+    if (menuData.length === 0) {
+      return res.status(404).json({
+        error: true,
+        message: 'Menu Data Fetch: No Data Found',
       });
+    }
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Menu Data Fetch: Succeed',
+      menuData,
     });
   } catch (err) {
-    console.log('showMenus Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to show Menus, Server Error' });
+    // Server Error
+    console.error('Show Menus Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Menus',
+    });
   }
-  return console.log('ShowMenus Executed');
 };
 
+// Controller to show a single menu
 exports.showSingleMenu = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       id: Joi.number().min(1).required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const { id } = value;
-    console.log(id);
-    db.query('SELECT * FROM menus WHERE id = $1', [id], (err, results) => {
-      if (err) {
-        console.log('showSingleMenu ERROR', err);
-        return res.status(500).json({
-          err: true,
-          message: 'Failed to retrieve menu',
-        });
-      }
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'Menu not found' });
-      }
-      const {
-        name, category, baseprice, baseonlineprice,
-      } = results.rows[0];
-      const menuData = {
-        name, category, baseprice, baseonlineprice,
-      };
-      return res.status(200).json({
-        error: false,
-        message: 'MenuData retrieved successfully',
-        menuData,
+    // DB read
+    const menuData = await selectSingleMenu(value.id);
+    // Not Found
+    if (!menuData) {
+      return res.status(404).json({
+        error: true,
+        message: 'Menu not found',
       });
+    }
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Menu Data Fetch: Succeed',
+      menuData,
     });
   } catch (err) {
-    console.log('showMenu Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to show Menu, Server Error' });
+    // Server Error
+    console.error('Show Single Menu Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Single Menu',
+    });
   }
-  return console.log('showSingleMenu Executed');
 };
 
+// Controller to update a menu
 exports.updateMenu = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       id: Joi.number().required(),
       name: Joi.string().min(1).required(),
@@ -164,65 +151,55 @@ exports.updateMenu = async (req, res) => {
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const {
-      id, name, category, basePrice, baseOnlinePrice,
-    } = value;
-    db.query('UPDATE menus SET name = $2, category = $3, basePrice = $4, baseOnlinePrice = $5 WHERE  id = $1', [id, name, category, basePrice, baseOnlinePrice], (err) => {
-      if (err) {
-        console.log(' updateMenus Failed, DATABASE Err');
-        return res.status(500).json({
-          error: true,
-          message: 'Failed to Update',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Menu Updated!',
-      });
+    // Update on DB
+    await updateMenu(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Update Menu: Succeed',
     });
   } catch (err) {
-    console.log('updateMenu Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to update Menu, Server Error' });
+    // Server Error
+    console.error('Update Menu Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Menu',
+    });
   }
-  return console.log('updateMenus Executed');
 };
 
+// Controller to delete a menu
 exports.deleteMenus = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       id: Joi.number().min(1).required(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
-      return res.status(204).json({
+      return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
-    const { id } = value;
-    db.query('DELETE FROM menus WHERE id = $1', [id], (err) => {
-      if (err) {
-        console.log('deleteMenu db Error');
-        return res.status(500).json({
-          error: true,
-          message: 'Failed to deleteMenu',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Menu Deleted!',
-      });
+    // Delete on  DB
+    await deleteMenu(value.id);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Delete Menu: Succeed',
     });
   } catch (err) {
-    console.log('deleteMenu Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to delete Menu, Server Error' });
+    // Server Error
+    console.error('Delete Menu Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Delete Menu',
+    });
   }
-  return console.log('deleteMenus Executed');
 };
