@@ -11,7 +11,7 @@ const { updateEmployeeBranch } = require('../db/func/employee/updateEmployee');
 const { updateEmployee } = require('../db/func/employee/updateEmployee');
 
 // Controller for show Employees
-exports.showAllEmployee = async (req, res) => {
+exports.showEmployees = async (req, res) => {
   try {
     // Decode CompanyId
     const authorizationHeader = req.headers.authorization;
