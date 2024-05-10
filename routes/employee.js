@@ -129,6 +129,19 @@ const router = express.Router();
  *                  error: false
  *                  message: "Employee Data Fetch: Succeed"
  *                  employeeData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
  *            description: No employees found
  *            content:
@@ -148,7 +161,7 @@ const router = express.Router();
  *                  error: true
  *                  message: "Server Error: Show All Employees"
  */
-router.get('/showEmployees', isLoggedIn, employeeController.showAllEmployee);
+router.get('/showEmployees', isLoggedIn, employeeController.showEmployees);
 
 /**
  *  @swagger
@@ -180,6 +193,19 @@ router.get('/showEmployees', isLoggedIn, employeeController.showAllEmployee);
  *                  error: false
  *                  message: "Employee Data Fetch: Succeed"
  *                  employeeData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
  *            description: Employee not found
  *            content:
@@ -239,6 +265,19 @@ router.post('/showSingleEmployee', isLoggedIn, employeeController.showSingleEmpl
  *                example:
  *                  error: true
  *                  message: "Bad Request: Validation"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error adding employee
  *            content:
@@ -280,6 +319,19 @@ router.post('/addEmployee', isLoggedIn, employeeController.createEmployee);
  *                example:
  *                  error: false
  *                  message: "Delete Employee: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error deleting employee
  *            content:
@@ -321,6 +373,19 @@ router.post('/deleteEmployee', isLoggedIn, employeeController.deleteEmployee);
  *                example:
  *                  error: false
  *                  message: "Update Employee: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error updating employee
  *            content:
@@ -362,6 +427,19 @@ router.post('/updateEmployee', isLoggedIn, employeeController.updateEmployee);
  *                example:
  *                  error: false
  *                  message: "Update Employees Branch ID: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error updating employees' branches
  *            content:

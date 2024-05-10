@@ -218,6 +218,19 @@ const router = express.Router();
  *                  error: true
  *                  message: "Bad Request: Validation"
  *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
  *            description: No branches found
  *            content:
@@ -237,7 +250,7 @@ const router = express.Router();
  *                  error: true
  *                  message: "Server Error: Show Branch"
  */
-router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
+router.get('/showBranches', isLoggedIn, branchController.showBranches);
 
 /**
  *  @swagger
@@ -269,6 +282,19 @@ router.get('/showBranches', isLoggedIn, branchController.showAllBranch);
  *                  error: false
  *                  message: "Branch data Fetch: Succeed"
  *                  branchData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
  *            description: Branch not found
  *            content:
@@ -329,6 +355,19 @@ router.post('/showSingleBranch', isLoggedIn, branchController.showSingleBranch);
  *                  error: true
  *                  message: "Bad Request: Validation"
  *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  *            content:
@@ -379,6 +418,19 @@ router.post('/addBranch', isLoggedIn, branchController.createBranch);
  *                example:
  *                  error: true
  *                  message: "Delete Branch: Failed - Branch has active employees"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  *            content:
@@ -430,6 +482,19 @@ router.post('/deleteBranch', isLoggedIn, branchController.deleteBranch);
  *                  error: true
  *                  message: "Bad Request: Validation"
  *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
  *            description: Server error
  *            content:
