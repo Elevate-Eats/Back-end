@@ -10,7 +10,7 @@ const { checkIfBranchDeletable } = require('../db/func/branch/deleteBranch');
 const { updateBranch } = require('../db/func/branch/updateBranch');
 
 // Branch Controller for Showing All Branch
-exports.showAllBranch = async (req, res) => {
+exports.showBranches = async (req, res) => {
   try {
     // Decode Company Id from JWT
     const authorizationHeader = req.headers.authorization;
