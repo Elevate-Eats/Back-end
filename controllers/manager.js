@@ -1,136 +1,109 @@
-const jwt = require('jsonwebtoken');
-const { Pool } = require('pg');
 const Joi = require('joi');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const db = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// Required Function Helpers
+const { selectManagers } = require('../db/func/manager/selectManagers.js');
+const { selectSingleManager } = require('../db/func/manager/selectSingleManager');
+const { insertManager } = require('../db/func/manager/insertManager');
+const { deleteManager } = require('../db/func/manager/deleteManager');
+const { updateManager } = require('../db/func/manager/updateManager');
+const { checkEmail } = require('../db/func/manager/checkEmail');
 
-exports.showAllManager = async (req, res) => {
+// Controller for Showing All Managers
+exports.showManagers = async (req, res) => {
   try {
+    // Decoding CompanyId
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded;
-    const { search, limit } = req.query;
-    db.query('SELECT * FROM users WHERE companyId = $1', [companyid], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch manager data' });
-      }
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'manager not found' });
-      }
-      let managerData = results.rows.map((manager) => {
-        const {
-          id, name, phone, email, role, branchAccess,
-        } = manager;
-        return {
-          id, name, phone, email, role, branchAccess,
-        };
+    // Validation
+    const schema = Joi.object({
+      search: Joi.string().optional(),
+      limit: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
-      if (search) {
-        managerData = managerData.filter((branch) => branch.name.toLowerCase().startsWith(
-          search.toLowerCase(),
-        ));
-      }
-      if (limit) {
-        managerData = managerData.slice(0, Number(limit));
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'manager data retrieved successfully',
-        managerData,
+    }
+    const { search, limit } = value;
+    // Read from DB
+    const managerData = await selectManagers(companyid, search, limit);
+    // Not Found
+    if (managerData.length === 0) {
+      return res.status(404).json({
+        error: true,
+        message: 'Manager Data Fetch: No Data Found',
       });
+    }
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Manager Data Fetch: Succeed',
+      managerData,
     });
   } catch (err) {
-    console.log('showmanager Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve manager data' });
+    // Server Error
+    console.error('Show All Managers Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show All Managers',
+    });
   }
-  return console.log('showAllmanager controller executed');
 };
 
+// Controller for Showing Single Manager
 exports.showSingleManager = async (req, res) => {
   try {
-    const { id } = req.body;
-    db.query('SELECT * FROM users WHERE id = $1', [id], (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: true, message: 'Failed to fetch manager data' });
-      }
-
-      if (results.rows.length === 0) {
-        return res.status(404).json({ error: true, message: 'Manager not found' });
-      }
-
-      const {
-        name, nickname, phone, email, role, branchAccess,
-      } = results.rows[0];
-      const managerData = {
-        id, name, nickname, phone, email, role, branchAccess,
-      };
-
-      return res.status(200).json({
-        error: false,
-        message: 'Manager data retrieved successfully',
-        managerData,
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
       });
+    }
+    const { id } = value;
+    // Read from DB
+    const managerData = await selectSingleManager(id);
+    if (!managerData) {
+      return res.status(404).json({
+        error: true,
+        message: 'Manager not found',
+      });
+    }
+    return res.status(200).json({
+      error: false,
+      message: 'Manager Data Fetch: Succeed',
+      managerData,
     });
   } catch (err) {
-    console.log('showBranch Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed to retrieve branch data' });
+    console.error('Show Single Manager Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Single Manager',
+    });
   }
-  return console.log('showSingleManager controller executed');
 };
 
-exports.deleteManager = async (req, res) => {
-  try {
-    const { id } = req.body;
-    await db.query('DELETE FROM users WHERE id = $1 ', [id], (err) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Manager deleted',
-      });
-    });
-  } catch (err) {
-    console.log('deleteManager Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed delete Manager' });
-  }
-  return console.log('deleteManager controller executed');
-};
-
-// Helper for createManager
-
-async function checkEmailExistence(email) {
-  return new Promise((resolve, reject) => {
-    db.query('SELECT email from users WHERE email = $1', [email], (err, results) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-      } else {
-        resolve(results.rows.length > 0);
-      }
-    });
-  });
-}
-
+// Controller for Creating a Manager
 exports.createManager = async (req, res) => {
   try {
+    // Decoding company id
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader.split(' ')[1];
     const decoded = jwt.decode(token, process.env.JWT_SECRET);
     const { companyid } = decoded;
+    // Validation
     const schema = Joi.object({
       name: Joi.string().required(),
       nickname: Joi.string().min(1).required(),
@@ -141,50 +114,49 @@ exports.createManager = async (req, res) => {
       password: Joi.string().min(8).required(),
       passwordConfirm: Joi.ref('password'),
     });
-
     const { error, value } = schema.validate(req.body, { abortEarly: false });
-
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
     const {
       name, nickname, phone, role, email, branchAccess, password,
     } = value;
-    const emailExists = await checkEmailExistence(email);
+    // Check Email
+    const emailExists = await checkEmail(email);
     if (emailExists) {
-      return res.status(409).json({
+      return res.status(400).json({
         error: true,
-        message: 'Email already used',
+        message: 'Bad Request: Email used',
       });
     }
     const hashedPassword = await bcrypt.hash(password, 8);
-    await db.query('INSERT INTO users (name, nickname, email, password, role, phone, branchAccess, companyId) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [name, nickname, email, hashedPassword, role, phone, branchAccess, companyid], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          error: true,
-          message: 'failed to addManager',
-        });
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Manager Added',
-      });
+    // Insert to DB
+    await insertManager({
+      name, nickname, email, password: hashedPassword, role, phone, branchAccess, companyid,
+    });
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Create Manager: Succeed',
     });
   } catch (err) {
-    console.log('Add Manager Error');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed createManager' });
+    // Server Error
+    console.error('Create Manager Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Create Manager',
+    });
   }
-  return console.log('createBranch controller executed');
 };
 
+// Controller for Updating a Manager
 exports.updateManager = async (req, res) => {
   try {
+    // Validation
     const schema = Joi.object({
       id: Joi.number().required(),
       name: Joi.string().required(),
@@ -194,33 +166,65 @@ exports.updateManager = async (req, res) => {
       email: Joi.string().email().required(),
       branchAccess: Joi.string().required(),
     });
-
     const { error, value } = schema.validate(req.body, { abortEarly: false });
-
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Validation error',
+        message: 'Bad Request: Validation',
         details: error.details.map((x) => x.message),
       });
     }
     const {
       id, name, nickname, phone, role, email, branchAccess,
     } = value;
-    checkEmailExistence(email);
-    db.query('UPDATE users SET name = $2, nickname = $3, phone = $4, role = $5, email = $6, branchaccess = $7 WHERE id = $1', [id, name, nickname, phone, role, email, branchAccess], (err) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.status(200).json({
-        error: false,
-        message: 'Manager updated',
-      });
+    // Update on DB
+    await updateManager({
+      id, name, nickname, phone, role, email, branchAccess,
+    });
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Update Manager: Succeed',
     });
   } catch (err) {
-    console.log('updateManager Error:');
-    console.log(err);
-    return res.status(500).json({ error: true, message: 'Failed updateManager' });
+    // Server Error
+    console.error('Update Manager Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Update Manager',
+    });
   }
-  return console.log('updateManager controller executed');
+};
+
+// Controller for Deleting a Manager
+exports.deleteManager = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      id: Joi.number().required(),
+    });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    const { id } = value;
+    // Delete on DB
+    await deleteManager(id);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Delete Manager: Succeed',
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Delete Manager Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Delete Manager',
+    });
+  }
 };

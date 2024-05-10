@@ -110,7 +110,7 @@ const router = express.Router();
  *  paths:
  *    /manager/v1/showManagers:
  *      get:
- *        summary: Returns a list of Manager
+ *        summary: Returns a list of managers
  *        tags:
  *          - Manager
  *        security:
@@ -120,48 +120,56 @@ const router = express.Router();
  *            name: search
  *            schema:
  *              type: string
- *            description: Find Manager Data base of Keyword
+ *            description: Keyword to search managers
  *          - in: query
  *            name: limit
  *            schema:
  *              type: integer
- *            description: Show limited Number of Managers
+ *            description: Limit the number of managers returned
  *        responses:
  *          200:
- *            description: Manager Found
+ *            description: Managers data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: manager data retrieved successfully
- *                  managerData:
- *                    - id: 1
- *                      name: "Santoso"
- *                      phone: "+6281122445566"
- *                      email: "user@example.com"
- *                      role: general_manager
+ *                  message: "Manager Data Fetch: Succeed"
+ *                  managerData: [...]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Manager not Found
+ *            description: No managers found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: manager not found
+ *                  message: "Manager Data Fetch: No Data Found"
  *          500:
- *            description: Failed to Fetch Manager
+ *            description: Server error fetching managers
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to retrieve manager data
+ *                  message: "Server Error: Show All Managers"
  */
-router.get('/showManagers', isLoggedIn, managerController.showAllManager);
+router.get('/showManagers', isLoggedIn, managerController.showManagers);
 
 /**
  *  @swagger
@@ -176,44 +184,54 @@ router.get('/showManagers', isLoggedIn, managerController.showAllManager);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelManager'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelManager'
  *        responses:
  *          200:
- *            description: A single manager object
+ *            description: Manager data retrieved successfully
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Manager data retrieved successfully
- *                  managerData:
- *                    id: 10
- *                    name: John Doe
- *                    phone: "+6281122445566"
- *                    email: user@example.com
- *                    role: general_manager
- *                    branchAccess: "{all}"
+ *                  message: "Manager Data Fetch: Succeed"
+ *                  managerData: {...}
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          404:
- *            description: Manager not Found
+ *            description: Manager not found
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Manager not found
+ *                  message: "Manager not found"
  *          500:
- *            description: Fetch Data Failed
+ *            description: Server error fetching manager data
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed to retrieve branch data
+ *                  message: "Server Error: Show Single Manager"
  */
 router.post('/showSingleManager', isLoggedIn, managerController.showSingleManager);
 
@@ -222,7 +240,7 @@ router.post('/showSingleManager', isLoggedIn, managerController.showSingleManage
  *  paths:
  *    /manager/v1/addManager:
  *      post:
- *        summary: Adds a new Manager
+ *        summary: Adds a new manager
  *        tags:
  *          - Manager
  *        security:
@@ -230,6 +248,9 @@ router.post('/showSingleManager', isLoggedIn, managerController.showSingleManage
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/addManager'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/addManager'
@@ -242,35 +263,38 @@ router.post('/showSingleManager', isLoggedIn, managerController.showSingleManage
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Manager added
+ *                  message: "Create Manager: Succeed"
  *          400:
- *            description: Validation Error
+ *            description: Validation error
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Validation Error
- *                  details: Error Message from API
- *          409:
- *            description: Email already used
+ *                  message: "Bad Request: Validation / Email Used"
+ *          401:
+ *            description: Unauthorized due to Token Problem
  *            content:
  *              application/json:
  *                schema:
- *                  $ref: '#/components/definitions-response/regularResponse'
- *                example:
- *                  error: true
- *                  message: Email already used
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Manager add Failed
+ *            description: Server error adding manager
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: failed to add Manager
+ *                  message: "Server Error: Create Manager"
  */
 router.post('/addManager', isLoggedIn, managerController.createManager);
 
@@ -287,6 +311,9 @@ router.post('/addManager', isLoggedIn, managerController.createManager);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/showSingleDelManager'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/showSingleDelManager'
@@ -299,16 +326,29 @@ router.post('/addManager', isLoggedIn, managerController.createManager);
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: false
- *                  message: Manager deleted
+ *                  message: "Delete Manager: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *          500:
- *            description: Employee deletion failed
+ *            description: Server error deleting manager
  *            content:
  *              application/json:
  *                schema:
  *                  $ref: '#/components/definitions-response/regularResponse'
  *                example:
  *                  error: true
- *                  message: Failed delete Manager
+ *                  message: "Failed delete Manager"
  */
 router.post('/deleteManager', isLoggedIn, managerController.deleteManager);
 
@@ -325,9 +365,44 @@ router.post('/deleteManager', isLoggedIn, managerController.deleteManager);
  *        requestBody:
  *          required: true
  *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/updateManager'
  *            application/x-www-form-urlencoded:
  *              schema:
  *                $ref: '#/components/schemas/updateManager'
+ *        responses:
+ *          200:
+ *            description: Manager updated successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: false
+ *                  message: "Update Manager: Succeed"
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
+ *          500:
+ *            description: Server error updating manager
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Update Manager"
  */
 router.post('/updateManager', isLoggedIn, managerController.updateManager);
 
