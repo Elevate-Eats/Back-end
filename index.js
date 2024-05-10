@@ -26,17 +26,63 @@ const swOptions = {
     openapi: '3.1.0',
     info: {
       title: 'Elevate Eats API Documentation',
+      version: '1.0.0', // Always good to include a version
+      description: 'API documentation for all endpoints related to Elevate Eats services.',
     },
     servers: [
       {
         url: envURL || fallbackURL,
       },
     ],
+    tags: [
+      {
+        name: 'Authentication',
+        description: 'Endpoints related to User Authentication',
+      },
+      {
+        name: 'Manager',
+        description: 'Endpoints related to Manager Data',
+      },
+      {
+        name: 'Branch',
+        description: 'Endpoints related to Branch Data',
+      },
+      {
+        name: 'Employee',
+        description: 'Endpoints related to Employee Data',
+      },
+      {
+        name: 'menuCompany',
+        description: 'Endpoints related to Menu Data in Company Level',
+      },
+      {
+        name: 'menuBranch',
+        description: 'Endpoints related to Menu Data in Branch Level',
+      },
+      {
+        name: 'Transaction',
+        description: 'Endpoints related to Transaction Data',
+      },
+      {
+        name: 'Item',
+        description: 'Endpoints related to Item Data',
+      },
+      {
+        name: 'Analytics',
+        description: 'Endpoints related to Data Analytics',
+      },
+      {
+        name: 'Report',
+        description: 'Endpoints related to Report Data',
+      },
+    ],
   },
   apis: [
-    './routes/*.js',
+    './routes/*.js', // Ensure your route files use these tags consistently
   ],
 };
+
+module.exports = swOptions;
 
 const swSpecs = swaggerJsdoc(swOptions);
 app.use(
