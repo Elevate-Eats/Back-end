@@ -13,7 +13,9 @@ exports.addExpense = async (req, res) => {
       name: Joi.string().required(),
       count: Joi.number().required(),
       date: Joi.date().required(),
+      price: Joi.number().required(),
       notes: Joi.string().required(),
+      total: Joi.number().required(),
       category: Joi.string().required(),
       branchId: Joi.string().required(),
     });
@@ -48,6 +50,8 @@ exports.updateExpense = async (req, res) => {
       name: Joi.string().required(),
       count: Joi.number().required(),
       date: Joi.date().required(),
+      price: Joi.number().required(),
+      total: Joi.number().required(),
       notes: Joi.string().required(),
       category: Joi.string().required(),
       branchId: Joi.string().required(),

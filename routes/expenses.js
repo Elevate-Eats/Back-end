@@ -16,6 +16,7 @@
  *         - count
  *         - date
  *         - notes
+ *         - total
  *         - category
  *         - branchId
  *       properties:
@@ -25,6 +26,12 @@
  *         count:
  *           type: number
  *           description: Count of items or services purchased
+ *         price:
+ *           type: number
+ *           description: price of items or services purchased
+ *         total:
+ *           type: number
+ *           description: total price of items or services purchased
  *         date:
  *           type: string
  *           format: date
@@ -40,7 +47,9 @@
  *           description: Branch identifier where the expense occurred
  *       example:
  *         name: Office Supplies
- *         count: 10
+ *         count: 2
+ *         price: 150000
+ *         total: 300000
  *         date: "2023-08-01"
  *         notes: "Purchased new stationery"
  *         category: "Supplies"
@@ -51,6 +60,8 @@
  *         - id
  *         - name
  *         - count
+ *         - price
+ *         - total
  *         - date
  *         - notes
  *         - category
@@ -65,6 +76,12 @@
  *         count:
  *           type: number
  *           description: Count of items or services purchased
+ *         price:
+ *           type: number
+ *           description: price of items or services purchased
+ *         total:
+ *           type: number
+ *           description: total price of items or services purchased
  *         date:
  *           type: string
  *           format: date
@@ -81,7 +98,9 @@
  *       example:
  *         id: 1
  *         name: Office Supplies
- *         count: 15
+ *         count: 3
+ *         price: 150000
+ *         total: 300000
  *         date: "2023-08-15"
  *         notes: "Updated stationery purchase"
  *         category: "Supplies"

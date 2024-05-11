@@ -7,6 +7,8 @@ exports.up = function (knex) {
   return knex.schema.createTable('expenses', (table) => {
     table.increments('id').primary(); // Automatically managed auto-incrementing ID
     table.integer('count');
+    table.float('price');
+    table.float('total');
     table.string('name', 100);
     table.string('category', 100);
     table.date('date');
@@ -23,5 +25,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('items');
+  return knex.schema.dropTableIfExists('expenses');
 };

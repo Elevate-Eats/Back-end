@@ -4,13 +4,13 @@ const db = require('../pool');
 
 exports.insertExpense = async (expenseData) => {
   const {
-    name, count, date, notes, category, branchId,
+    name, count, price, total, date, notes, category, branchId,
   } = expenseData;
   const query = `
-    INSERT INTO expenses (name, count, date, notes, category, branchId)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO expenses (name, count, price, total, date, notes, category, branchId)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
   `;
-  const values = [name, count, date, notes, category, branchId];
+  const values = [name, count, price, total, date, notes, category, branchId];
   try {
     const result = await db.query(query, values);
     return result.rows[0];
