@@ -118,6 +118,7 @@ app.use('/item/v1/', require('./routes/items'));
 app.use('/transaction/v1/', require('./routes/transaction'));
 app.use('/analytics/v1/', require('./routes/analytics'));
 app.use('/report/v1/', require('./routes/reports'));
+app.use('/expense/v1/', require('./routes/expenses'));
 
 // Start the server
 const port = process.env.API_PORT || 8080;
