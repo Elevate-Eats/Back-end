@@ -39,6 +39,19 @@ const router = express.Router();
  *               example: PDF data stream
  *         400:
  *           description: Bad request, parameter missing or incorrect
+ *         401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
  *         500:
  *           description: Internal server error, unable to fetch report
  */

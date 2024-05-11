@@ -4,6 +4,8 @@ const Joi = require('joi');
 const { insertCompleteTransaction } = require('../db/func/analytics/insertCompleteTransaction');
 const { selectDailyAnalytics } = require('../db/func/analytics/selectDailyAnalytics');
 const { selectDailyItemAnalytics } = require('../db/func/analytics/selectDailyItemAnalytics');
+const { selectAdvancedAnalytics } = require('../db/func/analytics/selectAdvancedAnalytics');
+const { selectAdvancedItemAnalytics } = require('../db/func/analytics/selectAdvancedItemAnalytics');
 
 // Controller for Recording Transactions
 exports.recordTransaction = async (req, res) => {
@@ -73,6 +75,42 @@ exports.showDailySummary = async (req, res) => {
   }
 };
 
+// Controller for Calculated Summary
+exports.showAdvancedSummary = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      companyId: Joi.number().required(),
+      branchId: Joi.number().optional(),
+      startDate: Joi.date().optional(),
+      endDate: Joi.date().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Read from DB
+    const data = await selectAdvancedAnalytics(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Advanced Analytics Data Fetched: Succeed',
+      data,
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Advanced Analytics Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Advanced Analytics',
+    });
+  }
+};
+
 // Controller for Showing Items Summary
 exports.showItemsSummary = async (req, res) => {
   try {
@@ -106,6 +144,42 @@ exports.showItemsSummary = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Server Error: Show Items Summary',
+    });
+  }
+};
+// Controller for Advanced Item Summary
+exports.showAdvancedItemsSummary = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      companyId: Joi.number().required(),
+      branchId: Joi.number().optional(),
+      startDate: Joi.date().optional(),
+      endDate: Joi.date().optional(),
+      menuId: Joi.number().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Read From DB
+    const data = await selectAdvancedItemAnalytics(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Advanced Items Analytics Data Fetched: Succeed',
+      data,
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Advanced Items Summary Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Advanced Items Summary',
     });
   }
 };
