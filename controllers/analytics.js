@@ -3,6 +3,7 @@ const Joi = require('joi');
 // Helper Function
 const { insertCompleteTransaction } = require('../db/func/analytics/insertCompleteTransaction');
 const { selectDailyAnalytics } = require('../db/func/analytics/selectDailyAnalytics');
+const { selectHourlyAnalytics } = require('../db/func/analytics/selectHourlyAnalytics');
 const { selectDailyItemAnalytics } = require('../db/func/analytics/selectDailyItemAnalytics');
 const { selectAdvancedAnalytics } = require('../db/func/analytics/selectAdvancedAnalytics');
 const { selectAdvancedItemAnalytics } = require('../db/func/analytics/selectAdvancedItemAnalytics');
@@ -71,6 +72,42 @@ exports.showDailySummary = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Server Error: Show Daily Summary',
+    });
+  }
+};
+
+// Controller for Showing Hourly Summary
+exports.showHourlySummary = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      companyId: Joi.number().required(),
+      branchId: Joi.number(),
+      startDateTime: Joi.date().iso(),
+      endDateTime: Joi.date().iso(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Read from DB
+    const data = await selectHourlyAnalytics(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Hourly Analytics Data Fetched: Succeed',
+      data,
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Show Hourly Summary Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Hourly Summary',
     });
   }
 };
