@@ -85,7 +85,7 @@ exports.showExpenses = async (req, res) => {
       branchId: Joi.number().required(),
       search: Joi.string().optional(),
       limit: Joi.number().optional(),
-      date: Joi.date().iso().required(),
+      date: Joi.date().iso().optional(),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {

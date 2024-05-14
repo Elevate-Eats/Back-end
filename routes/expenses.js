@@ -145,7 +145,6 @@ const router = express.Router();
  *            schema:
  *              type: string
  *              format: date
- *            required: true
  *            description: Date identifier to filter expenses
  *          - in: query
  *            name: search
