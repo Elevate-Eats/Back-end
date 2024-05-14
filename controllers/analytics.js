@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const moment = require('moment-timezone'); // make sure to install moment-timezone if not already included
 
 // Helper Function
 const { insertCompleteTransaction } = require('../db/func/analytics/insertCompleteTransaction');
@@ -47,16 +48,22 @@ exports.showDailySummary = async (req, res) => {
     const schema = Joi.object({
       companyId: Joi.number().required(),
       branchId: Joi.number(),
-      startDate: Joi.date(),
-      endDate: Joi.date(),
+      startDate: Joi.date().iso(),
+      endDate: Joi.date().iso(),
     });
-    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    const { error, value } = schema.validate(req.query, { abortEarly: false, convert: true });
     if (error) {
       return res.status(400).json({
         error: true,
-        message: 'Bad Request: Validation',
+        message: 'Bad Request: Validation Errors',
         details: error.details.map((x) => x.message),
       });
+    }
+    if (value.startDate) {
+      value.startDate = moment(value.startDate).startOf('day').toISOString();
+    }
+    if (value.endDate) {
+      value.endDate = moment(value.endDate).endOf('day').toISOString();
     }
     // Read from DB
     const data = await selectDailyAnalytics(value);

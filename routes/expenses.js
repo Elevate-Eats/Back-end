@@ -141,6 +141,13 @@ const router = express.Router();
  *            required: true
  *            description: Branch identifier to filter expenses
  *          - in: query
+ *            name: date
+ *            schema:
+ *              type: string
+ *              format: date
+ *            required: true
+ *            description: Date identifier to filter expenses
+ *          - in: query
  *            name: search
  *            schema:
  *              type: string

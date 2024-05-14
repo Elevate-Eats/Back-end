@@ -37,9 +37,13 @@ exports.up = function (knex) {
         v_total_sales NUMERIC; -- Declare variable for total sales
     BEGIN
         -- Fetch the transaction date, company ID, and branch ID from the transactions table
-        SELECT transactiondate, companyid, branchid INTO v_transaction_date, v_company_id, v_branch_id
+        -- Adjust the transaction date by truncating it to the start of the day (midnight) in the Jakarta timezone
+        SELECT DATE_TRUNC('day', transactiondate AT TIME ZONE 'Asia/Jakarta') AT TIME ZONE 'UTC', companyid, branchid 
+        INTO v_transaction_date, v_company_id, v_branch_id
         FROM transactions WHERE id = NEW.transactionid;
-    
+
+        -- Convert truncated timestamp back to date
+        v_transaction_date := v_transaction_date::date;
         -- Calculate the total number of items sold for the transaction
         SELECT SUM(count) INTO v_items_sold FROM items WHERE transactionid = NEW.transactionid;
         
