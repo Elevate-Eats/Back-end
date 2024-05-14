@@ -85,6 +85,7 @@ exports.showExpenses = async (req, res) => {
       branchId: Joi.number().required(),
       search: Joi.string().optional(),
       limit: Joi.number().optional(),
+      date: Joi.date().iso().required(),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
@@ -94,8 +95,10 @@ exports.showExpenses = async (req, res) => {
         details: error.details.map((x) => x.message),
       });
     }
-    const { search, limit, branchId } = value;
-    const expenses = await selectExpenses(search, limit, branchId);
+    const {
+      search, limit, branchId, date,
+    } = value;
+    const expenses = await selectExpenses(search, limit, branchId, date);
     if (!expenses[0]) {
       return res.status(404).json({
         error: true,
