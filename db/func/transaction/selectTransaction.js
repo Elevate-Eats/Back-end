@@ -1,7 +1,7 @@
 // Function Helper for Inserting Transaction
 const db = require('../pool');
 
-exports.selectTransactions = async (companyid, filters) => {
+exports.selectTransactions = async (companyid, filters, offset) => {
   try {
     const {
       search, limit, branch, transactionStatus,
@@ -30,8 +30,8 @@ exports.selectTransactions = async (companyid, filters) => {
     }
 
     // Applying limit directly in the SQL query
-    query += ` LIMIT $${values.length + 1}`;
-    values.push(limit);
+    query += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    values.push(limit, offset);
 
     const { rows } = await db.query(query, values);
     return rows;

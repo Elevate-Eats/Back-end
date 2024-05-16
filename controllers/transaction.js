@@ -94,7 +94,8 @@ exports.showTransactions = async (req, res) => {
     // Validation
     const schema = Joi.object({
       search: Joi.string(),
-      limit: Joi.number(),
+      limit: Joi.number().integer().min(1).default(10),
+      page: Joi.number().integer().min(1).default(1),
       branch: Joi.number(),
       status: Joi.string(),
     });
@@ -106,8 +107,10 @@ exports.showTransactions = async (req, res) => {
         details: error.details.map((x) => x.message),
       });
     }
-    // Read from DB
-    const transactions = await selectTransactions(companyid, value);
+    // Calculate offset
+    const offset = (value.page - 1) * value.limit;
+    // Read from DB using helper function with pagination
+    const transactions = await selectTransactions(companyid, value, offset);
     // Not Found
     if (transactions.length === 0) {
       return res.status(404).json({

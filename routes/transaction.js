@@ -139,6 +139,11 @@ const router = express.Router();
  *              type: integer
  *            description: Limit the number of transactions returned
  *          - in: query
+ *            name: page
+ *            schema:
+ *              type: integer
+ *            description: Page the number of transactions returned
+ *          - in: query
  *            name: branch
  *            schema:
  *              type: integer
