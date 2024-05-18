@@ -130,10 +130,18 @@
  *          sumItemsSold:
  *            type: integer
  *            description: The total number of items sold aggregated over the specified period.
-*        example:
+ *        example:
  *          menuId: 1
  *          sumTotalSales: 46000.00
  *          sumItemsSold: 3
+ *      summedExpenseData:
+ *        type: object
+ *        properties:
+ *          sumtotal:
+ *            type: integer
+ *            description: The identifier of the menu item.
+ *        example:
+ *          sumtotal: 46000.00
  */
 
 const express = require('express');
@@ -567,6 +575,77 @@ router.get('/showAdvancedSummary', isLoggedIn, analyticsController.showAdvancedS
  *            description: Server error
  */
 router.get('/showAdvancedItemsSummary', isLoggedIn, analyticsController.showAdvancedItemsSummary);
+
+/**
+ *  @swagger
+ *  paths:
+ *    /analytics/v1/showAdvancedExpenses:
+ *      get:
+ *        summary: Fetch advanced summarized expenses data
+ *        tags:
+ *          - Analytics
+ *        security:
+ *          - bearerAuth: []
+ *        parameters:
+ *          - in: query
+ *            name: branchId
+ *            schema:
+ *              type: integer
+ *            required: false
+ *            description: Optional branch identifier to filter expenses
+ *          - in: query
+ *            name: startDate
+ *            schema:
+ *              type: string
+ *              format: date
+ *            required: false
+ *            description: Optional start date to filter expenses
+ *          - in: query
+ *            name: endDate
+ *            schema:
+ *              type: string
+ *              format: date
+ *            required: false
+ *            description: Optional end date to filter expenses
+ *        responses:
+ *          200:
+ *            description: Advanced expenses data retrieved successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: "Advanced Expenses Data Fetch: Succeed"
+ *                    data:
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/summedExpenseData'
+ *          400:
+ *            description: Validation error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *          500:
+ *            description: Server error fetching advanced expenses data
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  $ref: '#/components/definitions-response/regularResponse'
+ *                example:
+ *                  error: true
+ *                  message: "Server Error: Show Summed Expenses"
+ */
+router.get('/showAdvancedExpenses', isLoggedIn, analyticsController.showAdvancedExpenses);
+
 
 /**
  *  @swagger

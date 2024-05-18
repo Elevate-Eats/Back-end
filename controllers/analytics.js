@@ -9,6 +9,7 @@ const { selectAdvancedHourlyAnalytics } = require('../db/func/analytics/selectAd
 const { selectDailyItemAnalytics } = require('../db/func/analytics/selectDailyItemAnalytics');
 const { selectAdvancedAnalytics } = require('../db/func/analytics/selectAdvancedAnalytics');
 const { selectAdvancedItemAnalytics } = require('../db/func/analytics/selectAdvancedItemAnalytics');
+const { selectSummedExpenses } = require('../db/func/analytics/selectSummedExpense');
 
 // Controller for Recording Transactions
 exports.recordTransaction = async (req, res) => {
@@ -261,6 +262,41 @@ exports.showAdvancedItemsSummary = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Server Error: Show Advanced Items Summary',
+    });
+  }
+};
+
+// Controller for Calculated Summary
+exports.showAdvancedExpenses = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      branchId: Joi.number().optional(),
+      startDate: Joi.date().optional(),
+      endDate: Joi.date().optional(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Read from DB
+    const data = await selectSummedExpenses(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Advanced Expenses Data Fetch: Succeed',
+      data,
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Advanced Expenses Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Sumemd Expenses',
     });
   }
 };
