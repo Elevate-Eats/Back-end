@@ -46,7 +46,6 @@ exports.predictTransaction = async (req, res) => {
   url.searchParams.append('branchId', branchId);
   url.searchParams.append('startDate', new Date(startDate).toISOString().split('T')[0]);
   url.searchParams.append('endDate', new Date(endDate).toISOString().split('T')[0]);
-  console.log(url);
   try {
     const fetch = (await import('node-fetch')).default;
 
@@ -60,7 +59,6 @@ exports.predictTransaction = async (req, res) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    console.log(response);
     const data = await response.json();
 
     const dataAsArray = Array.isArray(data) ? data : [data];
