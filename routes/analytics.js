@@ -646,7 +646,6 @@ router.get('/showAdvancedItemsSummary', isLoggedIn, analyticsController.showAdva
  */
 router.get('/showAdvancedExpenses', isLoggedIn, analyticsController.showAdvancedExpenses);
 
-
 /**
  *  @swagger
  *  paths:
