@@ -56,6 +56,23 @@
  *          totalsales: 50000.00
  *          numberoftransactions: 10
  *          numberofitemssold: 20
+ *      advancedHourlySummaryData:
+ *        type: object
+ *        properties:
+ *          hour:
+ *            type: string
+ *            format: date-time  # Changed from date to date-time to include specific hours
+ *          sumtotalsales:
+ *            type: number
+ *            format: double
+ *          sumtransactions:
+ *            type: integer
+ *          sumitemssold:
+ *            type: integer
+ *        example:
+ *          sumtotalsales: 50000.00
+ *          sumtransactions: 10
+ *          sumitemssold: 20
  *      DailyItemsAnalyticsData:
  *        type: object
  *        properties:
@@ -265,6 +282,77 @@ router.get('/showDailySummary', isLoggedIn, analyticsController.showDailySummary
  *            description: Server error
  */
 router.get('/showHourlySummary', isLoggedIn, analyticsController.showHourlySummary);
+
+/**
+ *  @swagger
+ *  paths:
+ *    /analytics/v1/showAdvancedHourlySummary:
+ *      get:
+ *        summary: Fetch hourly summary analytics for a specific branch within a datetime range
+ *        tags:
+ *          - Analytics
+ *        security:
+ *          - bearerAuth: []
+ *        parameters:
+ *          - in: query
+ *            name: companyId
+ *            required: true
+ *            schema:
+ *              type: integer
+ *          - in: query
+ *            name: branchId
+ *            schema:
+ *              type: integer
+ *          - in: query
+ *            name: startDateTime
+ *            schema:
+ *              type: string
+ *              format: date-time
+ *          - in: query
+ *            name: endDateTime
+ *            schema:
+ *              type: string
+ *              format: date-time
+ *        responses:
+ *          200:
+ *            description: Advanced Hourly summary data fetched successfully
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/AdvancedSummaryData'
+ *          400:
+ *            description: Validation Error
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                example:
+ *                  error: true
+ *                  message: "Bad Request: Validation"
+ *                  details: ["API Detailed Message"]
+ *          401:
+ *            description: Unauthorized due to Token Problem
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    error:
+ *                      type: boolean
+ *                      example: true
+ *                    message:
+ *                      type: string
+ *                      example: "Unauthorized: Token expired"
+ *          500:
+ *            description: Server error
+ */
+router.get('/showAdvancedHourlySummary', isLoggedIn, analyticsController.showAdvancedHourlySummary);
 
 /**
  *  @swagger

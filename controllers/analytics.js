@@ -1,10 +1,11 @@
 const Joi = require('joi');
-const moment = require('moment-timezone'); // make sure to install moment-timezone if not already included
+const moment = require('moment-timezone');
 
 // Helper Function
 const { insertCompleteTransaction } = require('../db/func/analytics/insertCompleteTransaction');
 const { selectDailyAnalytics } = require('../db/func/analytics/selectDailyAnalytics');
 const { selectHourlyAnalytics } = require('../db/func/analytics/selectHourlyAnalytics');
+const { selectAdvancedHourlyAnalytics } = require('../db/func/analytics/selectAdvancedHourlyAnalytics');
 const { selectDailyItemAnalytics } = require('../db/func/analytics/selectDailyItemAnalytics');
 const { selectAdvancedAnalytics } = require('../db/func/analytics/selectAdvancedAnalytics');
 const { selectAdvancedItemAnalytics } = require('../db/func/analytics/selectAdvancedItemAnalytics');
@@ -115,6 +116,42 @@ exports.showHourlySummary = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Server Error: Show Hourly Summary',
+    });
+  }
+};
+
+// Controller for Showing Summed Hourly Summary
+exports.showAdvancedHourlySummary = async (req, res) => {
+  try {
+    // Validation
+    const schema = Joi.object({
+      companyId: Joi.number().required(),
+      branchId: Joi.number(),
+      startDateTime: Joi.date().iso(),
+      endDateTime: Joi.date().iso(),
+    });
+    const { error, value } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+      return res.status(400).json({
+        error: true,
+        message: 'Bad Request: Validation',
+        details: error.details.map((x) => x.message),
+      });
+    }
+    // Read from DB
+    const data = await selectAdvancedHourlyAnalytics(value);
+    // Succeed
+    return res.status(200).json({
+      error: false,
+      message: 'Advanced Hourly Analytics Data Fetched: Succeed',
+      data,
+    });
+  } catch (err) {
+    // Server Error
+    console.error('Show Advanced Hourly Summary Server Error:', err);
+    return res.status(500).json({
+      error: true,
+      message: 'Server Error: Show Advanced Hourly Summary',
     });
   }
 };
