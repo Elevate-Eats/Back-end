@@ -64,3 +64,6 @@ desktop.ini
 
 # Windows shortcuts
 *.lnk
+
+#Service Account File
+imageEditorKeyFile.json
