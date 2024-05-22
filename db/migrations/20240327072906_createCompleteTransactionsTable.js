@@ -6,7 +6,7 @@
 exports.up = function (knex) {
   return knex.schema.createTable('completetransactions', (table) => {
     table.increments('id').primary(); // Automatically managed auto-incrementing ID
-    table.integer('transactionid').unsigned().notNullable();
+    table.integer('transactionid').unsigned().notNullable().unique();
     table.foreign('transactionid').references('transactions.id')
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
