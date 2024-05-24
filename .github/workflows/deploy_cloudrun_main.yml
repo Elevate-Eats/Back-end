@@ -32,7 +32,10 @@ jobs:
       uses: 'google-github-actions/setup-gcloud@v2'
       with:
         version: '>= 363.0.0'
-      
+
+    - name: Decode GCP Keyfile
+      run: echo ${{ secrets.GCP_IMAGE_KEYFILE }} | base64 -d > imageEditorKeyFile.json
+
     - name: Configure Docker for Google Artifact Registry
       run: gcloud auth configure-docker asia-east1-docker.pkg.dev
 
@@ -61,6 +64,8 @@ jobs:
           --set-env-vars "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" \
           --set-env-vars "JWT_COOKIE_EXPIRES=${{ secrets.JWT_COOKIE_EXPIRES }}" \
           --set-env-vars "REPORT_SERVICE_URL=${{ secrets.REPORT_SERVICE_URL }}"  \
+          -- set-env-vars "GCLOUD_KEYFILE = ${{ secrets.GCLOUD_KEYFILE }}" \
+          -- set-env-vars "GCLOUD_STORAGE_BUCKET = ${{ secrets.GCLOUD_STORAGE_BUCKET }}" \
           --port=8080 \
           --region=asia-east1 \
           --platform=managed \

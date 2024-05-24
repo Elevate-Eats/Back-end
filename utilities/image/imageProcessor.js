@@ -11,7 +11,7 @@ exports.processImage = (file) => {
         `<svg>
           <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="black"/>
         </svg>`,
-        'utf-8'
+        'utf-8',
       ),
       blend: 'dest-in',
     }])
