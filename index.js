@@ -119,6 +119,7 @@ app.use('/transaction/v1/', require('./routes/transaction'));
 app.use('/analytics/v1/', require('./routes/analytics'));
 app.use('/report/v1/', require('./routes/reports'));
 app.use('/expense/v1/', require('./routes/expenses'));
+app.use('/userProfile/v1/', require('./routes/picture'));
 
 // Start the server
 const port = process.env.API_PORT || 8080;

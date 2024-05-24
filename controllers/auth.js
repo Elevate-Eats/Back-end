@@ -12,6 +12,7 @@ const { checkCompany } = require('../db/func/auth/checkCompany');
 const { insertCompany } = require('../db/func/auth/insertCompany');
 const { insertUser } = require('../db/func/auth/insertUser');
 const { checkUserId } = require('../db/func/auth/checkUserId');
+const { generateSignedUrl } = require('../utilities/image/getSignedUrl');
 
 // For Forget Password (later)
 // const nodemailer = require('nodemailer');
@@ -62,8 +63,10 @@ exports.login = async (req, res) => {
       role,
       companyid,
       branchAccess,
+      profilepicname,
     } = credentials;
-
+    const profilePictureUrl = await generateSignedUrl('user-pic', profilepicname);
+    console.log(profilePictureUrl);
     // Token Creation
     const token = jwt.sign({
       id,
@@ -85,6 +88,7 @@ exports.login = async (req, res) => {
       message,
       token,
       credentials,
+      profilePictureUrl,
     });
   } catch (err) {
     console.error('Login Server Error: ', err);

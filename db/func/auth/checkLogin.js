@@ -24,6 +24,7 @@ exports.checkLogin = async (email, password) => {
       role,
       companyid,
       branchAccess,
+      profilepicname,
     } = rows[0];
     const credentials = {
       id,
@@ -31,6 +32,7 @@ exports.checkLogin = async (email, password) => {
       role,
       companyid,
       branchAccess,
+      profilepicname,
     };
     return {
       valid: true,
