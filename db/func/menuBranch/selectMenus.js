@@ -1,13 +1,17 @@
-// Helper Function Select MenuBranch
-
 const db = require('../pool');
 
 exports.selectMenus = async (branchId, search, limit) => {
   try {
-    let query = 'SELECT menuid, branchid, name, category, baseprice, baseonlineprice FROM menubranch WHERE branchid = $1';
+    // Joining the menucompany table to fetch profilepicname
+    let query = `
+      SELECT mb.menuid, mb.branchid, mb.name, mb.category, mb.baseprice, mb.baseonlineprice, mc.profilepicname 
+      FROM menubranch mb 
+      LEFT JOIN menus mc ON mb.menuid = mc.id 
+      WHERE mb.branchid = $1
+    `;
     const values = [branchId];
     if (search && Number.isNaN(limit)) {
-      query += ' AND LOWER(name) LIKE LOWER($2)';
+      query += ' AND LOWER(mb.name) LIKE LOWER($2)';
       values.push(`%${search}%`);
     }
     if (!Number.isNaN(limit) && !search) {
@@ -15,7 +19,7 @@ exports.selectMenus = async (branchId, search, limit) => {
       values.push(limit);
     }
     if (!Number.isNaN(limit) && search) {
-      query += ' AND LOWER(name) LIKE LOWER($2) LIMIT $3';
+      query += ' AND LOWER(mb.name) LIKE LOWER($2) LIMIT $3';
       values.push(`%${search}%`);
       values.push(limit);
     }

@@ -1,10 +1,14 @@
-// Helper Function Select Single MenuBranch
-
 const db = require('../pool');
 
 exports.selectSingleMenu = async (menuId, branchId) => {
   try {
-    const query = 'SELECT menuid, branchid, name, category, baseprice, baseonlineprice FROM menubranch WHERE menuid = $1 AND branchid = $2';
+    // Updated query to include a join with menucompany
+    const query = `
+      SELECT mb.menuid, mb.branchid, mb.name, mb.category, mb.baseprice, mb.baseonlineprice, mc.profilepicname
+      FROM menubranch mb
+      LEFT JOIN menus mc ON mb.menuid = mc.id
+      WHERE mb.menuid = $1 AND mb.branchid = $2
+    `;
     const values = [menuId, branchId];
     const result = await db.query(query, values);
     return result.rows[0];

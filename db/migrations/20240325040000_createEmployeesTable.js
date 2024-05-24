@@ -11,6 +11,7 @@ exports.up = function (knex) {
     table.float('bonus');
     table.integer('branchid').unsigned();
     table.integer('companyid').unsigned();
+    table.string('profilepicname');
 
     // Define foreign keys
     table.foreign('branchid').references('id').inTable('branches')

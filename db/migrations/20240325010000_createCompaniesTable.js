@@ -7,6 +7,7 @@ exports.up = function (knex) {
   return knex.schema.createTable('companies', (table) => {
     table.increments('id').primary();
     table.string('name', 100).unique();
+    table.string('profilepicname');
   });
 };
 /**

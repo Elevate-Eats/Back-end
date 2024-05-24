@@ -3,7 +3,7 @@ const db = require('../pool');
 
 exports.selectBranches = async (companyid, search, limit) => {
   try {
-    let query = 'SELECT id, name, address FROM branches WHERE companyid = $1';
+    let query = 'SELECT id, name, address, profilepicname FROM branches WHERE companyid = $1';
     const values = [companyid];
     if (search && Number.isNaN(limit)) {
       query += ' AND LOWER(name) LIKE LOWER($2)';

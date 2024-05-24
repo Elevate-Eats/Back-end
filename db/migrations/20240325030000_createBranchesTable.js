@@ -12,6 +12,7 @@ exports.up = function (knex) {
     table.integer('companyid').unsigned();
     table.string('phone', 15);
     table.integer('managerid').unsigned();
+    table.string('profilepicname');
 
     // Foreign key constraints
     table.foreign('companyid').references('id').inTable('companies')

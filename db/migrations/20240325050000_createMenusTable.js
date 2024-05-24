@@ -11,6 +11,7 @@ exports.up = function (knex) {
     table.float('baseprice');
     table.float('baseonlineprice');
     table.integer('companyid').unsigned();
+    table.string('profilepicname');
 
     // Set up the foreign key constraint
     table.foreign('companyid').references('id').inTable('companies')

@@ -12,6 +12,7 @@ exports.up = function (knex) {
     table.string('password', 100);
     table.enu('role', ['general_manager', 'area_manager', 'store_manager']);
     table.string('branchaccess', 100);
+    table.string('profilepicname');
     table.integer('companyid').unsigned();
     table.string('phone', 15);
     table.foreign('companyid').references('id').inTable('companies')

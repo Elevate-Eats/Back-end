@@ -4,7 +4,7 @@ const db = require('../pool');
 
 exports.selectMenus = async (companyid, search, limit) => {
   try {
-    let query = 'SELECT id, name, category, basePrice, baseOnlinePrice FROM menus WHERE companyId = $1';
+    let query = 'SELECT id, name, category, basePrice, baseOnlinePrice, profilepicname FROM menus WHERE companyId = $1';
     const values = [companyid];
     if (search && Number.isNaN(limit)) {
       query += ' AND LOWER(name) LIKE LOWER($2)';
