@@ -26,18 +26,18 @@ const router = express.Router();
 /**
  *  @swagger
  *  tags:
- *    - name: UserProfile
- *      description: Operations related to user profiles
+ *    - name: Picture
+ *      description: Operations related to pictures
  */
 
 /**
  *  @swagger
  *  paths:
- *    /userProfile/v1/upload:
+ *    /picture/v1/uploadUserProfile:
  *      post:
  *        summary: Uploads and processes a user's profile picture
  *        tags:
- *          - UserProfile
+ *          - Picture
  *        security:
  *          - bearerAuth: []
  *        requestBody:
@@ -85,6 +85,6 @@ const router = express.Router();
  *                  error: true
  *                  message: "Server Error: Upload User Profile"
  */
-router.post('/upload', isLoggedIn, pictureController.uploadUserProfile, pictureController.handleUploadUserProfile);
+router.post('/uploadUserProfile', isLoggedIn, pictureController.uploadUserProfile, pictureController.handleUploadUserProfile);
 
 module.exports = router;
