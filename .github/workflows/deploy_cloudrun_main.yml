@@ -34,7 +34,7 @@ jobs:
         version: '>= 363.0.0'
         
     - name: Decode GCP Keyfile
-      run: echo ${{ secrets.GCP_IMAGE_KEYFILE }} | base64 -d >${{ secrets.GCLOUD_KEYFILE }}
+      run: echo ${{ secrets.GCP_IMAGE_KEYFILE }} | base64 -d >/var/aapi/codes/${{ secrets.GCLOUD_KEYFILE }}
 
     - name: Configure Docker for Google Artifact Registry
       run: gcloud auth configure-docker asia-east1-docker.pkg.dev
