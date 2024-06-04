@@ -27,7 +27,7 @@ exports.selectTransactions = async (companyid, filters, offset) => {
       query += ` AND LOWER(customername) LIKE LOWER($${values.length + 1})`;
       values.push(`${search}%`);
     }
-
+    query += ' ORDER BY transactiondate DESC';
     // Applying limit directly in the SQL query
     query += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
     values.push(limit, offset);
