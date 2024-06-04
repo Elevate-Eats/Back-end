@@ -12,7 +12,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // SwaggerUI Docs
-// Please Add $DOCS_URL and $DOCS_PORT for HTTP or $DOCS_HTTPS_URL for HTTPS to build ENV
 const fallbackURL = 'http://localhost:8080';
 let envURL = null;
 if (process.env.DOCS_URL && process.env.DOCS_PORT) {
