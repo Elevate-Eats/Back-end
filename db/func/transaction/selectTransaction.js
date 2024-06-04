@@ -6,7 +6,6 @@ exports.selectTransactions = async (companyid, filters, offset) => {
     const {
       search, limit, branch, status,
     } = filters;
-    console.log(status);
     let query = 'SELECT * FROM transactions WHERE companyid = $1';
     const values = [companyid];
 
