@@ -149,10 +149,6 @@ exports.register = async (req, res) => {
         message: 'Bad Request: Company name already used',
       });
     }
-
-    // Insert new company
-    const companyId = await insertCompany(company);
-
     // Check if the email is already used
     const emailExists = await checkEmail(email);
     if (emailExists) {
@@ -161,6 +157,9 @@ exports.register = async (req, res) => {
         message: 'Bad Request: Email Used',
       });
     }
+
+    // Insert new company
+    const companyId = await insertCompany(company);
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 8);
