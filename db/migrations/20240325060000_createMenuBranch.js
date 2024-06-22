@@ -5,9 +5,6 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('menubranch', (table) => {
-    // Note: Knex does not support auto incrementing on non-primary key.
-    // If menuid isn't intended as an auto-increment PK,
-    // you might need a different setup or manual handling for its value.
     table.integer('menuid').unsigned().notNullable();
     table.integer('branchid').unsigned().notNullable();
     table.float('baseprice');

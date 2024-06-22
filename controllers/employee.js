@@ -180,7 +180,7 @@ exports.updateEmployeesBranch = async (req, res) => {
     // Validation
     const schema = Joi.object({
       employeeIds: Joi.array().items(Joi.number().required()).required(),
-      branchId: Joi.number().min(1).allow(null), // Allow 'null' for unassigning the employee
+      branchId: Joi.number().allow(null), // Allow 'null' for unassigning the employee
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
