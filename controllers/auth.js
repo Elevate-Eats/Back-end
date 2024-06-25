@@ -52,7 +52,7 @@ exports.login = async (req, res) => {
     const { email, password } = value;
 
     // Checking Credentials
-    let { valid, message, credentials } = await checkLogin(email, password);
+    const { valid, message, credentials } = await checkLogin(email, password);
     const { companyName, companyProfilePic } = await getCompany(credentials.companyid);
     if (!valid) {
       return res.status(400).json({
@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
       branchAccess,
       profilepicname,
     } = credentials;
-    credentials['companyName']= companyName;
+    credentials.companyName = companyName;
     const profilePictureUrl = await generateSignedUrl('user-pic', profilepicname);
     const companyPicUrl = await generateSignedUrl('company-pic', companyProfilePic);
     console.log(profilePictureUrl);

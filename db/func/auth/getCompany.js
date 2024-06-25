@@ -9,8 +9,8 @@ exports.getCompany = async (companyid) => {
     const companyProfilePic = rows[0].profilepicname;
     return {
       companyName,
-      companyProfilePic
-    }
+      companyProfilePic,
+    };
   } catch (err) {
     console.error('Error checking email: ', err);
     throw err;
