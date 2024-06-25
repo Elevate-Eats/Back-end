@@ -4,7 +4,7 @@ const db = require('../pool');
 exports.selectTransactions = async (companyid, filters, offset) => {
   try {
     const {
-      search, limit, branch, status,
+      search, limit, branch, status, startDate, endDate
     } = filters;
     let query = 'SELECT * FROM transactions WHERE companyid = $1';
     const values = [companyid];
@@ -20,6 +20,18 @@ exports.selectTransactions = async (companyid, filters, offset) => {
     } else if (status) {
       query += ' AND status = $2';
       values.push(status);
+    }
+
+    // Date range filter
+    if (startDate && endDate) {
+      query += ` AND transactiondate BETWEEN $${values.length + 1} AND $${values.length + 2}`;
+      values.push(startDate, endDate);
+    } else if (startDate) {
+      query += ` AND transactiondate >= $${values.length + 1}`;
+      values.push(startDate);
+    } else if (endDate) {
+      query += ` AND transactiondate <= $${values.length + 1}`;
+      values.push(endDate);
     }
 
     // Integrating search into the SQL query

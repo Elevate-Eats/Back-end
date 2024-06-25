@@ -153,6 +153,18 @@ const router = express.Router();
  *            schema:
  *              type: integer
  *            description: Filter transactions based on status (0 for success, 1 for pending)
+ *          - in: query
+ *            name: startDate
+ *            schema:
+ *              type: string
+ *              format: date
+ *            description: Start date to filter transactions (YYYY-MM-DD)
+ *          - in: query
+ *            name: endDate
+ *            schema:
+ *              type: string
+ *              format: date
+ *            description: End date to filter transactions (YYYY-MM-DD); must be after or the same as startDate
  *        responses:
  *          200:
  *            description: Transactions found

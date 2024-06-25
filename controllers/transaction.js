@@ -98,6 +98,10 @@ exports.showTransactions = async (req, res) => {
       page: Joi.number().integer().min(1).default(1),
       branch: Joi.number(),
       status: Joi.string(),
+      startDate: Joi.date().iso(),
+      endDate: Joi.date().iso()
+        .greater(Joi.ref('startDate'))
+        .when('startDate', { is: Joi.exist(), then: Joi.required() }),
     });
     const { error, value } = schema.validate(req.query, { abortEarly: false });
     if (error) {
