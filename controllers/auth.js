@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const { checkEmail } = require('../db/func/auth/checkEmail');
 const { checkLogin } = require('../db/func/auth/checkLogin');
 const { checkCompany } = require('../db/func/auth/checkCompany');
+const { getCompany } = require('../db/func/auth/getCompany');
 const { insertCompany } = require('../db/func/auth/insertCompany');
 const { insertUser } = require('../db/func/auth/insertUser');
 const { checkUserId } = require('../db/func/auth/checkUserId');
@@ -51,7 +52,8 @@ exports.login = async (req, res) => {
     const { email, password } = value;
 
     // Checking Credentials
-    const { valid, message, credentials } = await checkLogin(email, password);
+    let { valid, message, credentials } = await checkLogin(email, password);
+    const { companyName, companyProfilePic } = await getCompany(credentials.companyid);
     if (!valid) {
       return res.status(400).json({
         error: true,
@@ -65,7 +67,9 @@ exports.login = async (req, res) => {
       branchAccess,
       profilepicname,
     } = credentials;
+    credentials['companyName']= companyName;
     const profilePictureUrl = await generateSignedUrl('user-pic', profilepicname);
+    const companyPicUrl = await generateSignedUrl('company-pic', companyProfilePic);
     console.log(profilePictureUrl);
     // Token Creation
     const token = jwt.sign({
@@ -89,6 +93,7 @@ exports.login = async (req, res) => {
       token,
       credentials,
       profilePictureUrl,
+      companyPicUrl,
     });
   } catch (err) {
     console.error('Login Server Error: ', err);
