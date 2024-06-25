@@ -12,7 +12,7 @@ exports.generateSignedUrl = async (folderName, fileName) => {
   const options = {
     version: 'v4',
     action: 'read',
-    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 15 minutes
   };
 
   try {
