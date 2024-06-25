@@ -4,7 +4,7 @@ const db = require('../pool');
 exports.selectTransactions = async (companyid, filters, offset) => {
   try {
     const {
-      search, limit, branch, status, startDate, endDate
+      search, limit, branch, status, startDate, endDate,
     } = filters;
     let query = 'SELECT * FROM transactions WHERE companyid = $1';
     const values = [companyid];

@@ -164,7 +164,7 @@ const router = express.Router();
  *            schema:
  *              type: string
  *              format: date
- *            description: End date to filter transactions (YYYY-MM-DD); must be after or the same as startDate
+ *            description: End date to filter transactions (YYYY-MM-DD); after startdate
  *        responses:
  *          200:
  *            description: Transactions found
