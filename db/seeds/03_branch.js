@@ -8,40 +8,32 @@ exports.seed = (knex) => knex('branches').del()
   .then(() => knex('branches').insert([
     // Branches for Company 1
     {
-      name: 'Jakarta Store',
-      address: 'Central Jakarta, Jakarta',
+      name: 'Solo Store',
+      address: 'Jalan Ahmad Yani 219, Kartasura',
       companyid: 1,
-      phone: '+6285212345671',
-      managerid: 4, // Assuming this corresponds to Agus Setiawan
+      phone: '+6282224000250',
+      managerid: 4,
     },
     {
-      name: 'Bandung Store',
-      address: 'Bandung City, West Java',
+      name: 'Wates Store',
+      address: 'Jalan Wates, Yogyakarta',
       companyid: 1,
       phone: '+6285212345672',
-      managerid: 5, // Assuming this corresponds to Budi Raharjo
+      managerid: 5, 
     },
     {
-      name: 'Surabaya Store',
+      name: 'Jogja Store',
       address: 'Surabaya, East Java',
       companyid: 1,
       phone: '+6285212345673',
-      managerid: 6, // Assuming this corresponds to Citra Dewi
     },
     // Branches for Company 2
     {
-      name: 'Yogyakarta Store',
-      address: 'Yogyakarta, Special Region of Yogyakarta',
-      companyid: 2,
-      phone: '+6285212345674',
-      managerid: 7, // Assuming this corresponds to Dian Sastro
-    },
-    {
-      name: 'Semarang Store',
-      address: 'Semarang, Central Java',
+      name: 'Klaten Store',
+      address: 'Klaten, Central Java',
       companyid: 2,
       phone: '+6285212345675',
-      managerid: 8, // Assuming this corresponds to Eko Wahyudi
+      managerid: 8,
     },
   ]))
   .catch((error) => {
