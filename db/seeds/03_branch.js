@@ -19,7 +19,7 @@ exports.seed = (knex) => knex('branches').del()
       address: 'Jalan Wates, Yogyakarta',
       companyid: 1,
       phone: '+6285212345672',
-      managerid: 5, 
+      managerid: 5,
     },
     {
       name: 'Jogja Store',
