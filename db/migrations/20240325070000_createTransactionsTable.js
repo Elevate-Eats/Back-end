@@ -15,6 +15,7 @@ exports.up = function (knex) {
     table.integer('tablenumber');
     table.integer('status');
     table.integer('companyid').unsigned();
+    table.integer('cashierid').unsigned();
     table.index('branchid');
     table.index('transactiondate');
     // Define foreign key constraints
@@ -22,6 +23,9 @@ exports.up = function (knex) {
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
     table.foreign('companyid').references('id').inTable('companies')
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table.foreign('cashierid').references('id').inTable('users')
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
   });

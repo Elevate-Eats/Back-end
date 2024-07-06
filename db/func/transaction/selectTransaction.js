@@ -6,7 +6,10 @@ exports.selectTransactions = async (companyid, filters, offset) => {
     const {
       search, limit, branch, status, startDate, endDate,
     } = filters;
-    let query = 'SELECT * FROM transactions WHERE companyid = $1';
+    let query = `SELECT transactions.*, users.name AS cashiername
+    FROM transactions
+    JOIN users ON transactions.cashierid = users.id
+    WHERE transactions.companyid = $1`;
     const values = [companyid];
 
     // Adding conditions based on branch and status

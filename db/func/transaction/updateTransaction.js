@@ -10,9 +10,10 @@ exports.updateTransaction = async (transaction) => {
     totalprice, branchid,
     customername,
     tableNumber,
+    cashierid,
   } = transaction;
   try {
-    const query = 'UPDATE transactions SET transactiondate = $1, discount = $2, status = $3, paymentmethod = $4, totalprice = $5, branchid = $6, customername = $7, tablenumber = $8 WHERE id = $9';
+    const query = 'UPDATE transactions SET transactiondate = $1, discount = $2, status = $3, paymentmethod = $4, totalprice = $5, branchid = $6, customername = $7, tablenumber = $8, cashierid= $10 WHERE id = $9';
     const values = [
       transactiondate,
       discount,
@@ -23,6 +24,7 @@ exports.updateTransaction = async (transaction) => {
       customername,
       tableNumber,
       id,
+      cashierid,
     ];
     await db.query(query, values);
   } catch (err) {

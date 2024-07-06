@@ -39,6 +39,9 @@
  *            type: number
  *            description: Number of the table
  *            nullable: true
+ *          cashierid:
+ *            type: id
+ *            description: cashier's id
  *        example:
  *          transactiondate: "2024-03-15T14:30:00Z"
  *          discount: 10
@@ -48,6 +51,7 @@
  *          branchid: 1
  *          customername: "Alice Johnson"
  *          tableNumber: 5
+ *          cashierid: 3
  *      updateTransaction:
  *        type: object
  *        required:
@@ -89,6 +93,9 @@
  *            type: number
  *            description: Number of the table
  *            nullable: true
+ *          cashierid:
+ *            type: number
+ *            description: cashier's id
  *        example:
  *          id: 1
  *          transactiondate: 2024-03-15T14:30:00
@@ -99,6 +106,7 @@
  *          branchid: 12
  *          customername: Alice Johnson
  *          tableNumber: 5
+ *          cashierid: 3
  *      showSingleDelTransaction:
  *        type: object
  *        required:
