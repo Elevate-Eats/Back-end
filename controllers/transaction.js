@@ -25,7 +25,7 @@ exports.addTransaction = async (req, res) => {
       branchid: Joi.number().required(),
       customername: Joi.string().allow('', null),
       tableNumber: Joi.number().allow(null),
-      cashierid:Joi.number(),
+      cashierid: Joi.number(),
     });
     const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
