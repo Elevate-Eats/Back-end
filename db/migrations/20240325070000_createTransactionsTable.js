@@ -26,7 +26,7 @@ exports.up = function (knex) {
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
     table.foreign('cashierid').references('id').inTable('users')
-      .onDelete('CASCADE')
+      .onDelete('SET NULL')
       .onUpdate('CASCADE');
   });
 };
